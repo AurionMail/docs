@@ -9,6 +9,14 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+# Check for required tools
+for cmd in curl jq openssl; do
+  if ! command -v $cmd &> /dev/null; then
+    echo "❌ Missing required command dependency: $cmd. Please install it first."
+    exit 1
+  fi
+done
+
 # Load the configuration file
 CONFIG_FILE="install.conf"
 if [ ! -f "$CONFIG_FILE" ]; then
@@ -18,14 +26,8 @@ fi
 source "$CONFIG_FILE"
 
 echo "=============================================================="
-echo "🚀 Starting Aurion Core & Proxy Installation"
+echo "🚀 Starting Aurion Core & Proxy Automated Installation"
 echo "=============================================================="
-
-# Verify that the required compiled binaries are present
-if [ ! -f "./aurion-core" ] || [ ! -f "./aurion-proxy" ]; then
-  echo "❌ The compiled binaries 'aurion-core' and 'aurion-proxy' must be present in this directory."
-  exit 1
-fi
 
 # Automatically generate AUTH_FAKE_SALT_SECRET if not defined
 if [ -z "$AUTH_FAKE_SALT_SECRET" ]; then
@@ -34,18 +36,56 @@ if [ -z "$AUTH_FAKE_SALT_SECRET" ]; then
 fi
 
 # ------------------------------------------------------------------------------
-# 1. DIRECTORY CREATION AND BINARY DEPLOYMENT
+# 1. DIRECTORY CREATION
 # ------------------------------------------------------------------------------
 echo "📁 Creating production directories..."
 mkdir -p "$CORE_DIR"
 mkdir -p "$PROXY_DIR"
 
-echo "📦 Deploying binaries..."
-cp ./aurion-core "$CORE_DIR/"
-cp ./aurion-proxy "$PROXY_DIR/"
+# ------------------------------------------------------------------------------
+# 2. AUTOMATED BINARY DOWNLOADS FROM PUBLIC GITHUB RELEASES
+# ------------------------------------------------------------------------------
+echo "📥 Fetching latest releases from GitHub..."
+
+# Function to download asset from public GitHub latest release
+download_latest_asset() {
+  local repo=$1       # e.g., "AurionMail/core"
+  local asset_name=$2 # e.g., "aurion-core"
+  local dest_path=$3  # e.g., "/var/www/aurion/aurion-core"
+
+  echo "🔍 Detecting latest version for $repo..."
+  local api_url="https://api.github.com/repos/$repo/releases/latest"
+  
+  # Fetch release JSON
+  local release_json
+  release_json=$(curl -s "$api_url")
+
+  # Extract download URL for the target asset name
+  local download_url
+  download_url=$(echo "$release_json" | jq -r ".assets[] | select(.name==\"$asset_name\") | .browser_download_url")
+
+  if [ -z "$download_url" ] || [ "$download_url" == "null" ]; then
+    echo "❌ Error: Could not find asset '$asset_name' in the latest release of $repo."
+    exit 1
+  fi
+
+  local tag_name
+  tag_name=$(echo "$release_json" | jq -r ".tag_name")
+  echo "⬇️  Downloading $asset_name ($tag_name) from GitHub..."
+  
+  # Download binary
+  curl -L -s -o "$dest_path" "$download_url"
+  echo "💾 Saved to $dest_path"
+}
+
+# Download aurion-core from public repo
+download_latest_asset "AurionMail/core" "aurion-core" "$CORE_DIR/aurion-core"
+
+# Download aurion-proxy from public repo
+download_latest_asset "AurionMail/proxy" "aurion-proxy" "$PROXY_DIR/aurion-proxy"
 
 # ------------------------------------------------------------------------------
-# 2. PRODUCTION .ENV FILE GENERATION
+# 3. PRODUCTION .ENV FILE GENERATION
 # ------------------------------------------------------------------------------
 echo "📝 Generating .env file for Aurion Core..."
 cat << EOF > "$CORE_DIR/.env"
@@ -80,7 +120,6 @@ QUEUE_SIZE=$PROXY_QUEUE_SIZE
 WORKER_COUNT=$PROXY_WORKER_COUNT
 EOF
 
-# Append TLS variables to Proxy .env if provided, otherwise append commented templates
 if [ -n "$PROXY_TLS_CERT" ] && [ -n "$PROXY_TLS_KEY" ]; then
   cat << EOF >> "$PROXY_DIR/.env"
 
@@ -92,14 +131,13 @@ else
   cat << EOF >> "$PROXY_DIR/.env"
 
 # TLS configuration (Disabled by default)
-# Un-comment and set these paths once your TLS certificates are available:
 # TLS_CERT=/etc/letsencrypt/live/$DOMAIN/fullchain.pem
 # TLS_KEY=/etc/letsencrypt/live/$DOMAIN/privkey.pem
 EOF
 fi
 
 # ------------------------------------------------------------------------------
-# 3. APPLICATION PERMISSIONS MANAGEMENT
+# 4. APPLICATION PERMISSIONS MANAGEMENT
 # ------------------------------------------------------------------------------
 echo "🔒 Configuring ownership and file permissions..."
 chown -R $APP_USER:$APP_USER "$CORE_DIR"
@@ -110,27 +148,23 @@ chmod 600 "$CORE_DIR/.env"
 chmod 600 "$PROXY_DIR/.env"
 
 # ------------------------------------------------------------------------------
-# 4. APACHE REVERSE PROXY CONFIGURATION (HTTP - PORT 80)
+# 5. APACHE REVERSE PROXY CONFIGURATION (HTTP - PORT 80)
 # ------------------------------------------------------------------------------
 if [ -d "/etc/apache2/sites-available" ]; then
   echo "🌐 Configuring Apache Reverse Proxy in HTTP mode..."
   
-  # Enable mandatory Apache modules
   a2enmod proxy > /dev/null 2>&1 || true
   a2enmod proxy_http > /dev/null 2>&1 || true
   a2enmod headers > /dev/null 2>&1 || true
 
-  # Create standard HTTP VirtualHost file
   cat << EOF > /etc/apache2/sites-available/aurion.conf
 <VirtualHost *:80>
     ServerName $DOMAIN
 
-    # Forward HTTP requests to the local Go application
     ProxyPreserveHost On
     ProxyPass / http://localhost:$CORE_APP_PORT/
     ProxyPassReverse / http://localhost:$CORE_APP_PORT/
 
-    # Basic security headers
     Header always set X-Content-Type-Options "nosniff"
     Header always set X-Frame-Options "DENY"
     Header always set X-XSS-Protection "1; mode=block"
@@ -140,7 +174,6 @@ if [ -d "/etc/apache2/sites-available" ]; then
 </VirtualHost>
 EOF
 
-  # Enable the virtual host and restart Apache
   a2ensite aurion.conf > /dev/null 2>&1 || true
   systemctl restart apache2
 else
@@ -148,7 +181,7 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# 5. SYSTEMD SERVICES CONFIGURATION
+# 6. SYSTEMD SERVICES CONFIGURATION
 # ------------------------------------------------------------------------------
 echo "⚙️ Creating Systemd service: aurion (Core)..."
 cat << EOF > /etc/systemd/system/aurion.service
@@ -184,7 +217,6 @@ Restart=always
 RestartSec=5
 EnvironmentFile=$PROXY_DIR/.env
 
-# Grant the Go binary permission to bind to privileged port 25 without root privileges
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 CapabilityBoundingSet=CAP_NET_BIND_SERVICE
 
@@ -192,7 +224,6 @@ CapabilityBoundingSet=CAP_NET_BIND_SERVICE
 WantedBy=multi-user.target
 EOF
 
-# Reload systemd manager and start services
 echo "🔄 Reloading Systemd daemon and starting services..."
 systemctl daemon-reload
 
@@ -202,7 +233,6 @@ systemctl start aurion
 systemctl enable aurion-proxy
 systemctl start aurion-proxy
 
-# Fetch server's public IP for the summary report
 SERVER_IP=$(curl -s https://ifconfig.me || echo "YOUR_SERVER_IP")
 
 echo "=============================================================="
