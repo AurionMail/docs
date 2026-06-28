@@ -74,9 +74,8 @@ echo "💾 Saved and extracted to $DEPLOY_DIR"
 # ------------------------------------------------------------------------------
 # 3. DYNAMIC RUNTIME CONFIGURATION INJECTION
 # ------------------------------------------------------------------------------
-echo "⚙️ Injecting runtime configuration into public/config.json..."
-mkdir -p "$DEPLOY_DIR/public"
-cat << EOF > "$DEPLOY_DIR/public/config.json"
+echo "⚙️ Injecting runtime configuration into config.json..."
+cat << EOF > "$DEPLOY_DIR/config.json"
 {
   "AURION_API_BASE": "$AURION_API_BASE"
 }
