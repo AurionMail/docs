@@ -120,14 +120,21 @@ echo "✅ .env.local generated successfully."
 echo "📦 Installing Next.js production dependencies..."
 cd "$DEPLOY_DIR"
 
-# Clean up any pre-existing node_modules or locks extracted by mistake from the archive
+# Clean up any conflicting pre-existing artifacts
 rm -rf node_modules package-lock.json
 
-# Fix ownership right before running npm so the $APP_USER has full structural access
+# Fix the specific root-owned cache folder issue highlighted by npm
+if [ -d "/var/www/.npm" ]; then
+  echo "🛡️  Fixing npm cache ownership permissions..."
+  chown -R $APP_USER:$APP_USER "/var/www/.npm"
+fi
+
+# Ensure the deployment directory is fully owned by the app user
 chown -R $APP_USER:$APP_USER "$DEPLOY_DIR"
 
-# Run a clean production install under the application user context
-sudo -u $APP_USER npm install --omit=dev --no-audit --no-fund
+# Run install with an isolated temp cache path AND ignore dev lifecycle scripts (like husky)
+echo "📥 Running npm install under $APP_USER context..."
+sudo -u $APP_USER npm install --omit=dev --no-audit --no-fund --ignore-scripts --cache=/tmp/.npm-cache-$APP_USER
 
 cd - > /dev/null
 
@@ -136,11 +143,18 @@ cd - > /dev/null
 # ------------------------------------------------------------------------------
 echo "🔒 Configuring ownership and file permissions..."
 chown -R $APP_USER:$APP_USER "$DEPLOY_DIR"
+
+# Apply safe defaults: 755 for directories, 644 for regular files
 find "$DEPLOY_DIR" -type d -exec chmod 755 {} \;
 find "$DEPLOY_DIR" -type f -exec chmod 644 {} \;
-# Ensure the newly created node_modules binaries are executable by the service
+
+# RESTORE EXECUTION RIGHTS TO THE NODE BINARIES:
 if [ -d "$DEPLOY_DIR/node_modules/.bin" ]; then
+  echo "⚡ Restoring execution permissions for node framework binaries..."
   chmod -R 755 "$DEPLOY_DIR/node_modules/.bin"
+  
+  # Also fix target symlink binaries that Next.js references
+  find "$DEPLOY_DIR/node_modules/next/dist/bin" -type f -exec chmod 755 {} \; 2>/dev/null || true
 fi
 
 # ------------------------------------------------------------------------------
