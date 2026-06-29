@@ -96,6 +96,7 @@ PORT=$PORT
 JMAP_SERVER_URL=$JMAP_SERVER_URL
 APP_NAME="$APP_NAME"
 STALWART_FEATURES=$STALWART_FEATURES
+AURION_SERVER_URL=$AURION_SERVER_URL
 
 # Secret session key
 SESSION_SECRET="$SESSION_SECRET"
@@ -118,9 +119,16 @@ echo "✅ .env.local generated successfully."
 # ------------------------------------------------------------------------------
 echo "📦 Installing Next.js production dependencies..."
 cd "$DEPLOY_DIR"
-# Next.js requires node_modules to run, we install them cleanly via npm ci
+
+# Clean up any pre-existing node_modules or locks extracted by mistake from the archive
+rm -rf node_modules package-lock.json
+
+# Fix ownership right before running npm so the $APP_USER has full structural access
 chown -R $APP_USER:$APP_USER "$DEPLOY_DIR"
-sudo -u $APP_USER npm ci --omit=dev
+
+# Run a clean production install under the application user context
+sudo -u $APP_USER npm install --omit=dev --no-audit --no-fund
+
 cd - > /dev/null
 
 # ------------------------------------------------------------------------------
@@ -130,6 +138,10 @@ echo "🔒 Configuring ownership and file permissions..."
 chown -R $APP_USER:$APP_USER "$DEPLOY_DIR"
 find "$DEPLOY_DIR" -type d -exec chmod 755 {} \;
 find "$DEPLOY_DIR" -type f -exec chmod 644 {} \;
+# Ensure the newly created node_modules binaries are executable by the service
+if [ -d "$DEPLOY_DIR/node_modules/.bin" ]; then
+  chmod -R 755 "$DEPLOY_DIR/node_modules/.bin"
+fi
 
 # ------------------------------------------------------------------------------
 # 6. SYSTEMD SERVICE CONFIGURATION
