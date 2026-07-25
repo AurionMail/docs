@@ -71,7 +71,7 @@ if [ -z "$DOWNLOAD_URL" ] || [ "$DOWNLOAD_URL" == "null" ]; then
 fi
 
 TAG_NAME=$(echo "$RELEASE_JSON" | jq -r ".tag_name")
-echo "⬇️  Downloading $ASSET_NAME ($TAG_NAME) from GitHub..."
+echo "⬇  Downloading $ASSET_NAME ($TAG_NAME) from GitHub..."
 
 # Download the archive into a temporary folder
 TEMP_TAR="/tmp/bulwark-webmail-$TAG_NAME.tar.gz"
@@ -86,14 +86,14 @@ echo "💾 Saved and extracted to $DEPLOY_DIR"
 # ------------------------------------------------------------------------------
 # 3. DYNAMIC ENVIRONMENT CONFIGURATION GENERATION
 # ------------------------------------------------------------------------------
-echo "⚙️ Generating production .env.local configuration..."
+echo "⚙ Generating production .env.local configuration..."
 cat << EOF > "$DEPLOY_DIR/.env.local"
 # Local listen address and port
 HOSTNAME=$HOSTNAME
 PORT=$PORT
 
 # JMAP configuration
-JMAP_SERVER_URL=$JMAP_SERVER_URL
+
 APP_NAME="$APP_NAME"
 STALWART_FEATURES=$STALWART_FEATURES
 AURION_SERVER_URL=$AURION_SERVER_URL
@@ -125,16 +125,16 @@ rm -rf node_modules package-lock.json
 
 # Fix the specific root-owned cache folder issue highlighted by npm
 if [ -d "/var/www/.npm" ]; then
-  echo "🛡️  Fixing npm cache ownership permissions..."
+  echo "🛡  Fixing npm cache ownership permissions..."
   chown -R $APP_USER:$APP_USER "/var/www/.npm"
 fi
 
 # Ensure the deployment directory is fully owned by the app user
 chown -R $APP_USER:$APP_USER "$DEPLOY_DIR"
 
-# Run install with an isolated temp cache path AND ignore dev lifecycle scripts (like husky)
+# Run install with an isolated temp cache path to prevent global permission conflicts
 echo "📥 Running npm install under $APP_USER context..."
-sudo -u $APP_USER npm install --omit=dev --no-audit --no-fund --ignore-scripts --cache=/tmp/.npm-cache-$APP_USER
+sudo -u $APP_USER npm install --omit=dev --no-audit --ignore-scripts --no-fund --cache=/tmp/.npm-cache-$APP_USER
 
 cd - > /dev/null
 
@@ -160,7 +160,7 @@ fi
 # ------------------------------------------------------------------------------
 # 6. SYSTEMD SERVICE CONFIGURATION
 # ------------------------------------------------------------------------------
-echo "⚙️ Configuring systemd service unit..."
+echo "⚙ Configuring systemd service unit..."
 cat << EOF > /etc/systemd/system/bulwark-webmail.service
 [Unit]
 Description=Bulwark Webmail Service
@@ -240,7 +240,7 @@ EOF
   echo "🔄 Restarting Apache web server..."
   systemctl restart apache2
 else
-  echo "⚠️ Apache2 was not detected on this system. Skipping reverse proxy configuration."
+  echo "⚠ Apache2 was not detected on this system. Skipping reverse proxy configuration."
 fi
 
 SERVER_IP=$(curl -s https://ifconfig.me || echo "YOUR_SERVER_IP")
@@ -252,21 +252,21 @@ echo ""
 echo "🎯 NETWORK & PORTS SUMMARY:"
 echo "--------------------------------------------------------------"
 echo "🌐 Webmail Public URL : http://$DOMAIN"
-echo "⚙️  Internal Node App  : http://$HOSTNAME:$PORT"
+echo "⚙  Internal Node App  : http://$HOSTNAME:$PORT"
 echo "📁 Installation Path  : $DEPLOY_DIR"
 echo ""
 echo "📋 TO-DO LIST (MANUAL STEPS REQUIRED TO FINISH UP):"
 echo "--------------------------------------------------------------"
-echo "1️⃣  SESSION KEY RE-CONFIGURATION:"
+echo "1⃣  SESSION KEY RE-CONFIGURATION:"
 echo "   If you left the default session key in 'install.conf', generate"
 echo "   a unique cryptographically secure key now in $DEPLOY_DIR/.env.local :"
 echo "   $ openssl rand -base64 32"
 echo ""
-echo "2️⃣  DNS CONFIGURATION:"
+echo "2⃣  DNS CONFIGURATION:"
 echo "   Point your domain to this server's public IP:"
 echo "   📌 Type A   : $DOMAIN ➔ $SERVER_IP"
 echo ""
-echo "3️⃣  SSL/TLS CONFIGURATION (RECOMMENDED):"
+echo "3⃣  SSL/TLS CONFIGURATION (RECOMMENDED):"
 echo "   To secure JMAP transport and cookies, activate HTTPS via Certbot:"
 echo "   $ sudo certbot --apache -d $DOMAIN"
 echo "=============================================================="
