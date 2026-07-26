@@ -35,12 +35,12 @@ dsn: postgres://hydra:<YOUR_PASSWORD_HERE>@127.0.0.1:5432/hydra?sslmode=disable&
 urls:
   self:
     issuer: https://oauth.domain.org
-  consent: http://127.0.0.1:3000/consent
-  login: http://127.0.0.1:3000/login
-  logout: http://127.0.0.1:3000/logout
+  consent: https://sso.aurionmail.org/consent
+  login: https://sso.aurionmail.org/login
+  logout: https://sso.aurionmail.org/logout
   device:
-    verification: http://127.0.0.1:3000/device/verify
-    success: http://127.0.0.1:3000/device/success
+    verification: https://sso.aurionmail.org/device/verify
+    success: https://sso.aurionmail.org/device/success
 
 secrets:
   system:
