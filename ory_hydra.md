@@ -145,3 +145,75 @@ For this part, we used Apache, but you can use Ngink insetad, it os advised but 
 - sudo a2ensite hydra.conf 
 - sudo systemctl restart apache2
 
+### Config for clients
+#### Bulwark + Stalwart
+
+  sudo ./hydra create client   --endpoint http://127.0.0.1:4445   --id stalwart   --name "AurionMail Webmail"   --secret "hdd514sdduiuriuge"   --access-token-strategy jwt   --audience "stalwart"   --grant-type authorization_code,refresh_token   --response-type code   --scope openid,profile,email,offline_access   --redirect-uri "https://officialweb.mail.aurionmail.org/auth/callback,https://officialweb.mail.aurionmail.org/en/auth/callback,https://officialweb.mail.aurionmail.org/fr/auth/callback"   --token-endpoint-auth-method client_secret_post   --skip-consent
+
+### Cryptpad
+sudo ./hydra create client \
+  --endpoint http://127.0.0.1:4445 \
+  --id cryptpad \
+  --name "CryptPad" \
+  --secret "ds47sd82diffug2034sfqvcuezmsdgve5" \
+  --access-token-strategy jwt \
+  --grant-type authorization_code,refresh_token \
+  --response-type code \
+  --scope openid,profile,email,offline_access \
+  --redirect-uri "https://pad.aurionmail.org/ssoauth" \
+  --token-endpoint-auth-method client_secret_basic \
+  --skip-consent
+
+ ### Conf Bulwark
+
+Oauth : Y 
+OAuth Only : Y
+OAuthClientID: stalwart 
+OAuth Client Secret : secret 
+OAuth Issuer URL : https://auth.aurionmail.org
+Auto SSO : Y 
+
+### Conf Stalwart
+
+Authentication->Directories 
+
+Issuer URL : https://oauth.aurionmail.org
+Required Audience : null
+Required Scopes : null
+Username Claim : email
+Name Claim : name 
+Groups Claim : groups
+
+### Conf Cryptpad 
+
+```javascript
+// SPDX-FileCopyrightText: 2023 XWiki CryptPad Team <contact@cryptpad.org> and contributors
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+//const fs = require('node:fs');
+module.exports = {
+    // Enable SSO login on this instance
+    enabled: true,
+    // Block registration for non-SSO users on this instance
+    enforced: true,
+    // Allow users to add an additional CryptPad password to their SSO account
+    cpPassword: true,
+    // You can also force your SSO users to add a CryptPad password
+    forceCpPassword: true,
+    // List of SSO providers
+    list: [
+    {
+        name: 'hydra',
+        type: 'oidc',
+        url: 'https://oauth.aurionmail.org',
+        client_id: 'cryptpad',
+        client_secret: 'secret',
+        jwt_alg: 'RS256',
+        userinfo: false,
+        username_claim: 'sub'
+
+}
+    ]
+};
+```
