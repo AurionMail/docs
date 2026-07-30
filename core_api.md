@@ -57,3 +57,26 @@ Enable and start the service:
 sudo systemctl daemon-reload
 sudo systemctl enable aurion
 sudo systemctl start aurion
+
+conf apache
+
+<VirtualHost *:80>
+    ServerName aurion.mail.aurionmail.org
+
+    ProxyPreserveHost On
+    ProxyPass / http://localhost:8070/
+    ProxyPassReverse / http://localhost:8070/
+
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "DENY"
+    Header always set X-XSS-Protection "1; mode=block"
+
+    ErrorLog ${APACHE_LOG_DIR}/aurion-error.log
+    CustomLog ${APACHE_LOG_DIR}/aurion-access.log combined
+RewriteEngine on
+RewriteCond %{SERVER_NAME} =aurion.mail.aurionmail.org
+RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
+</VirtualHost>
+
+
+then cerbot
