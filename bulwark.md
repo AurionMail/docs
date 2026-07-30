@@ -1,5 +1,13 @@
 This conf file is used to pass secret to bulwark webmail. The details for configuration of SSO are un `ory_hydra.md`.
 
+### Bridge
+wget https://raw.githubusercontent.com/AurionMail/bulwark_customized/refs/heads/main/minimal-iframe.html
+
+sudo chmod -R 750 bulwark-bridge/
+sudo chown -R www-data:www-data bulwark-bridge/
+
+
+### Conf file
 ```
 <IfModule mod_ssl.c>
 <VirtualHost *:443>
@@ -44,7 +52,7 @@ This conf file is used to pass secret to bulwark webmail. The details for config
     Alias "/bridge-minimal.html" "/var/www/bulwark-bridge/bridge-minimal.html"
 
   <Location "/bridge-minimal.html">
-     Header always set Content-Security-Policy "frame-ancestors WEBMAIL_ORIGIN_WP"
+     Header always set Content-Security-Policy "frame-ancestors SSO_ORIGIN_WP"
      Require all granted
   </Location>
 
