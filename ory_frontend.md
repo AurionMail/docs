@@ -4,13 +4,13 @@ Ory Hydra only manage the OAuth and OIDC process. He doesn't have a fronted to l
 We use this app to check credential against LDAP and let the user consent to give acces to the clients app its info
 ### Installation
 - cd /opt
-- sudo git clone https://github.com/paulhenry46/hydra-login-consent-node
-- cd  hydra-login-consent-node
+- sudo git clone https://github.com/aurionMail/sso
+- cd  sso
 - sudo npm install
 - sudo cp .example.env .env
 - sudo npm run build
 - sudo npm run build:css
-- sudo chown -R hydra:hydra /opt/hydra-login-consent-node/
+- sudo chown -R hydra:hydra /opt/sso/
 - sudo nano /etc/systemd/system/hydra-login-consent.service and add
 ```
 [Unit]
@@ -20,7 +20,7 @@ After=network.target
 [Service]
 Type=simple
 User=hydra
-WorkingDirectory=/opt/hydra-login-consent-node
+WorkingDirectory=/opt/sso
 ExecStart=/usr/bin/npm run serve
 Restart=always
 RestartSec=5
