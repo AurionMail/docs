@@ -19,19 +19,19 @@ For testing with up to 30 users, 2GB cheap VPS is enough. In this tutorial, we w
 - nodeJS 22 LTS
 ## Cheatsheet
 
-| Service |  Port Usage | Adress & Port | Domain | User | Update type | Remarques |
+| Service |  Port Usage | Adress & Port | Domain | User | Update type | Path |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **LLDAP** |  UI | `127.0.0.1:17170` | `ldap.` | `lldap` | `AUTO (package manager)` | |
-| **LLDAP** | LDAP (Protocol) | `127.0.0.1:3890` | - | `lldap` | `AUTO (package manager)` | |
-| **Ory Hydra** | Authentification (Auth) | `127.0.0.1:4444` | `oauth.` | `hydra` | `MANUAL` | |
-| **Ory Hydra** | Administration (Admin) | `127.0.0.1:4445` | `oauth.` | `hydra` | `MANUAL` | The redirection for admin could be removed |
-| **SSO App** | Application SSO | `127.0.0.1:3030` | `sso.` | `hydra` | `MANUAL` | |
-| **Cryptpad** | Web App  | `127.0.0.1:3010` | `pad.` / `sand.` | `pad` | `MANUAL` | |
-| **Cryptpad** | WebSockets | `127.0.0.1:3013` | `pad.` / `sand.` | `pad` | `MANUAL` | |
-| **Bulwark Webmail** | Webmail UI | `127.0.0.1:3000` | `web.` | `user` | `MANUAL` | |
-| **Aurion API** | API | `127.0.0.1:8070` | `api.` | `aurion` | `MANUAL` | |
-| **Stalwart** | Mail Server | `127.0.0.1:8080` | `mail.` | `stalwart` | `MANUAL` | |
-| **Bridges** | Bridges | *Integrade with reverse proxy* | - | `aurion` | `MANUAL` | Inclus dans les autres services |
+| **LLDAP** |  UI | `127.0.0.1:17170` | `ldap.` | `lldap` | `AUTO (package manager)` | N/A |
+| **LLDAP** | LDAP (Protocol) | `127.0.0.1:3890` | - | `lldap` | `AUTO (package manager)` | N/A |
+| **Ory Hydra** | Authentification (Auth) | `127.0.0.1:4444` | `oauth.` | `aurion` | `MANUAL` |/home/aurion/aurionmail/hydra |
+| **Ory Hydra** | Administration (Admin) | `127.0.0.1:4445` | `oauth.` | `aurion` | `MANUAL` | /home/aurion/aurionmail/hydra|
+| **SSO App** | Application SSO | `127.0.0.1:3030` | `sso.` | `aurion` | `MANUAL` |/home/aurion/aurionmail/sso |
+| **Cryptpad** | Web App  | `127.0.0.1:3010` | `pad.` / `sand.` | `pad` | `MANUAL` |/home/pad/cryptpad/ |
+| **Cryptpad** | WebSockets | `127.0.0.1:3013` | `pad.` / `sand.` | `pad` | `MANUAL` | /home/pad/cryptpad|
+| **Bulwark Webmail** | Webmail UI | `127.0.0.1:3000` | `web.` | `user` | `MANUAL` |/home/bulwark/webmail |
+| **Aurion API** | API | `127.0.0.1:8070` | `api.` | `aurion` | `MANUAL` | /home/aurion/aurionmail/api |
+| **Stalwart** | Mail Server | `127.0.0.1:8080` | `mail.` | `stalwart` | `MANUAL` | /opt/stalwart |
+| **Bridges** | Bridges | *Integrade with reverse proxy* | - | `aurion` | `MANUAL` |/home/aurion/aurionmail/bridges  |
 
 ## LDAP
 - We use lldap from the [debian repo](https://software.opensuse.org//download.html?project=home%3AMasgalor%3ALLDAP&package=lldap)

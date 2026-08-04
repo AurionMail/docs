@@ -16,10 +16,10 @@ jobs:
 
       - name: Create folder structure
         run: |
-          mkdir -p aurion/hydra
-          mkdir -p aurion/api
-          mkdir -p aurion/sso
-          mkdir -p aurion/bridges
+          mkdir -p aurionmail/hydra
+          mkdir -p aurionmail/api
+          mkdir -p aurionmail/sso
+          mkdir -p aurionmail/bridges
 
       - name: Download and extract Hydra
         env:
@@ -31,7 +31,7 @@ jobs:
           
           echo "Downloading Hydra version: $HYDRA_TAG"
           curl -L "https://github.com/ory/hydra/releases/download/${HYDRA_TAG}/hydra_${HYDRA_VERSION}-linux_64bit.tar.gz" -o hydra.tar.gz
-          tar -xzf hydra.tar.gz -C aurion/hydra
+          tar -xzf hydra.tar.gz -C aurionmail/hydra
           rm hydra.tar.gz
 
       - name: Download API binary
@@ -41,8 +41,8 @@ jobs:
           API_TAG=$(gh release view --repo AurionMail/core-api --json tagName -q .tagName)
           
           echo "Downloading Core API version: $API_TAG"
-          curl -L "https://github.com/AurionMail/core-api/releases/download/${API_TAG}/aurion-api" -o aurion/api/aurion-api
-          chmod +x aurion/api/aurion-api
+          curl -L "https://github.com/AurionMail/core-api/releases/download/${API_TAG}/aurion-api" -o aurionmail/api/aurion-api
+          chmod +x aurionmail/api/aurion-api
 
       - name: Download and extract SSO
         env:
@@ -52,7 +52,7 @@ jobs:
           
           echo "Downloading SSO version: $SSO_TAG"
           curl -L "https://github.com/AurionMail/sso/releases/download/${SSO_TAG}/aurion-sso.zip" -o sso.zip
-          unzip -q sso.zip -d aurion/sso
+          unzip -q sso.zip -d aurionmail/sso
           rm sso.zip
 
       - name: Download and extract Bridges
@@ -64,15 +64,15 @@ jobs:
           echo "Downloading Bridges version: $BRIDGES_TAG"
           curl -L "https://github.com/AurionMail/bridges/archive/refs/tags/${BRIDGES_TAG}.zip" -o bridges.zip
           # --strip-components/junk paths to extract directly into bridges folder
-          unzip -q -j bridges.zip -d aurion/bridges
+          unzip -q -j bridges.zip -d aurionmail/bridges
           rm bridges.zip
 
       - name: Zip aurion directory
         run: |
-          zip -r aurion.zip aurion/
+          zip -r aurionmail.zip aurionmail/
 
       - name: Upload zip to Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload ${{ github.event.release.tag_name }} aurion.zip --clobber
+          gh release upload ${{ github.event.release.tag_name }} aurionmail.zip --clobber
