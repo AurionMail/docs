@@ -593,10 +593,23 @@ sudo systemctl start aurion
 
 ### Config for clients
 #### Bulwark + Stalwart
-
-  sudo ./hydra create client   --endpoint http://127.0.0.1:4445   --id stalwart   --name "AurionMail Webmail"   --secret "SECRET_BULWARK_SSO"   --access-token-strategy jwt   --audience "stalwart"   --grant-type authorization_code,refresh_token   --response-type code   --scope openid,profile,email,offline_access   --redirect-uri "https://web.DOMAIN/auth/callback,https://web.DOMAIN/en/auth/callback,https://web.DOMAIN/fr/auth/callback"   --token-endpoint-auth-method client_secret_post   --skip-consent
+```bash
+  sudo ./hydra create client \  
+  --endpoint http://127.0.0.1:4445 \  --id stalwart \
+  --name "AurionMail Webmail"  \
+  --secret "SECRET_BULWARK_SSO" \
+  --access-token-strategy jwt  \
+  --audience "stalwart" \ 
+  --grant-type authorization_code,refresh_token  \
+  --response-type code  \
+  --scope openid,profile,email,offline_access  \
+  --redirect-uri "https://web.DOMAIN/auth/callback,https://web.DOMAIN/en/auth/callback,https://web.DOMAIN/fr/auth/callback" \
+  --token-endpoint-auth-method client_secret_post \
+  --skip-consent
+```
 
 ### Cryptpad
+```bash
 sudo ./hydra create client \
   --endpoint http://127.0.0.1:4445 \
   --id cryptpad \
@@ -609,23 +622,22 @@ sudo ./hydra create client \
   --redirect-uri "https://pad.DOMAIN/ssoauth" \
   --token-endpoint-auth-method client_secret_basic \
   --skip-consent
-
+```
  ### Conf Bulwark
-
-Oauth : Y 
-OAuth Only : Y
-OAuthClientID: stalwart 
-OAuth Client Secret : SECRET_BULWARK_SSO 
-OAuth Issuer URL : https://auth.DOMAIN
-Auto SSO : Y 
+Go to admin ui : https://web.DOMAIN/admin then Authentication :
+- Oauth : Activated
+- OAuth Only : Activated
+- OAuthClientID: stalwart 
+- OAuth Client Secret : SECRET_BULWARK_SSO 
+- OAuth Issuer URL : https://auth.DOMAIN
+- Auto SSO : Activated
 
 ### Conf Stalwart
 
 Navigate to webUI with your admin account, then : Authentication->Directories 
-
-Issuer URL : https://oauth.DOMAIN
-Required Audience : null
-Required Scopes : null
-Username Claim : email
-Name Claim : name 
-Groups Claim : groups
+- Issuer URL : https://oauth.DOMAIN
+- Required Audience : null
+- Required Scopes : null
+- Username Claim : email
+- Name Claim : name 
+- Groups Claim : groups
