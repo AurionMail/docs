@@ -1,0 +1,92 @@
+name: Build and Attach CryptPad Release Asset
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Fetch CryptPad and Customized Release Tags
+        id: tags
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          CRYPTPAD_TAG=$(gh release view --repo cryptpad/cryptpad --json tagName -q .tagName)
+          CUSTOM_TAG=$(gh release view --repo AurionMail/cryptpad_customized --json tagName -q .tagName)
+          
+          echo "CryptPad latest release: $CRYPTPAD_TAG"
+          echo "Customized latest release: $CUSTOM_TAG"
+          
+          echo "cryptpad_tag=$CRYPTPAD_TAG" >> $GITHUB_OUTPUT
+          echo "custom_tag=$CUSTOM_TAG" >> $GITHUB_OUTPUT
+
+      - name: Download and extract CryptPad
+        run: |
+          CRYPTPAD_TAG="${{ steps.tags.outputs.cryptpad_tag }}"
+          curl -L "https://github.com/cryptpad/cryptpad/archive/refs/tags/${CRYPTPAD_TAG}.zip" -o cryptpad.zip
+          unzip -q cryptpad.zip
+          
+          # Rename extracted directory to standard 'cryptpad' name
+          EXTRACTED_DIR=$(find . -maxdepth 1 -type d -name "cryptpad-*" | head -n 1)
+          mv "$EXTRACTED_DIR" cryptpad
+          rm cryptpad.zip
+
+      - name: Install Dependencies
+        run: |
+          cd cryptpad
+          npm ci
+          npm run install:components
+
+      - name: Add SSO Plugin
+        run: |
+          cd cryptpad/lib/plugins
+          git clone https://github.com/cryptpad/sso
+
+      - name: Download, extract and overwrite customized files
+        run: |
+          CUSTOM_TAG="${{ steps.tags.outputs.custom_tag }}"
+          curl -L "https://github.com/AurionMail/cryptpad_customized/archive/refs/tags/${CUSTOM_TAG}.zip" -o customized.zip
+          unzip -q customized.zip
+          
+          EXTRACTED_CUSTOM=$(find . -maxdepth 1 -type d -name "cryptpad_customized-*" | head -n 1)
+          
+          # 1. Move customize directory to cryptpad root
+          if [ -d "$EXTRACTED_CUSTOM/customize" ]; then
+            cp -r "$EXTRACTED_CUSTOM/customize" cryptpad/
+          fi
+          
+          # 2. Overwrite lib directory files in cryptpad
+          if [ -d "$EXTRACTED_CUSTOM/lib" ]; then
+            cp -r "$EXTRACTED_CUSTOM/lib/." cryptpad/lib/
+          fi
+          
+          # 3. Overwrite www directory files in cryptpad
+          if [ -d "$EXTRACTED_CUSTOM/www" ]; then
+            cp -r "$EXTRACTED_CUSTOM/www/." cryptpad/www/
+          fi
+          
+          # Clean up downloaded customized archive and folder
+          rm -rf "$EXTRACTED_CUSTOM" customized.zip
+
+      - name: Archive CryptPad
+        run: |
+          zip -r cryptpad.zip cryptpad/
+
+      - name: Upload zip to Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ github.event.release.tag_name }} cryptpad.zip --clobber
