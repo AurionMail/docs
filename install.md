@@ -18,15 +18,20 @@ For testing with up to 30 users, 2GB cheap VPS is enough. In this tutorial, we w
 - postgresql for the Aurion API DB
 - nodeJS 22 LTS
 ## Cheatsheet
-- LLDAP UI: 127.0.0.1:17170 -> ldap.
-- LDAP: 127.0.0.1:3890
-- Ory Hydra Auth : 127.0.0.1:4444 -> oauth.
-- Ory Hydra Admin : 127.0.0.1:4445 -> oauth. (will be removed in future)
-- SSO App : 127.0.0.1:3030 -> sso.
-- Cryptpad : 127.0.0.1:3010 -> pad. / sand.
-- Cryptpad: 127.0.0.1:3013 -> pad. / sand.
-- Bulwark : 127.0.0.1:3000 -> web.
-- Aurion API : 127.0.0.1:8070 -> api.
+
+| Service |  Port Usage | Adress & Port | Domain | User | Update type | Remarques |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **LLDAP** |  UI | `127.0.0.1:17170` | `ldap.` | `lldap` | `AUTO (package manager)` | |
+| **LLDAP** | LDAP (Protocol) | `127.0.0.1:3890` | - | `lldap` | `AUTO (package manager)` | |
+| **Ory Hydra** | Authentification (Auth) | `127.0.0.1:4444` | `oauth.` | `hydra` | `MANUAL` | |
+| **Ory Hydra** | Administration (Admin) | `127.0.0.1:4445` | `oauth.` | `hydra` | `MANUAL` | The redirection for admin could be removed |
+| **SSO App** | Application SSO | `127.0.0.1:3030` | `sso.` | `hydra` | `MANUAL` | |
+| **Cryptpad** | Web App  | `127.0.0.1:3010` | `pad.` / `sand.` | `pad` | `MANUAL` | |
+| **Cryptpad** | WebSockets | `127.0.0.1:3013` | `pad.` / `sand.` | `pad` | `MANUAL` | |
+| **Bulwark Webmail** | Webmail UI | `127.0.0.1:3000` | `web.` | `user` | `MANUAL` | |
+| **Aurion API** | API | `127.0.0.1:8070` | `api.` | `aurion` | `MANUAL` | |
+| **Stalwart** | Mail Server | `127.0.0.1:8080` | `mail.` | `stalwart` | `MANUAL` | |
+| **Bridges** | Bridges | *Integrade with reverse proxy* | - | `aurion` | `MANUAL` | Inclus dans les autres services |
 
 ## LDAP
 - We use lldap from the [debian repo](https://software.opensuse.org//download.html?project=home%3AMasgalor%3ALLDAP&package=lldap)
@@ -963,55 +968,45 @@ now, apache conf file:
 </VirtualHost>
 ```
 - run certbot.
-## Install Webmail
 
-1. Define your installation paths and app user:
+## Bulwark Webmail
+
+1. **Download and Extract Webmail:** Sets up paths, backs up existing data, and extracts the latest release.
+Run these commands in your terminal to set up the files:
+
+- sudo mv /var/www/bulwark-webmail/data /tmp/bulwark-data-bak 2>/dev/null
+
+- sudo mkdir -p /var/www/bulwark-webmail
+- sudo mkdir -p /var/www/bulwark-webmail/data/settings /var/www/bulwark-webmail/data/admin /var/www/bulwark-webmail/data/admin-state
+- wget https://github.com/bulwarkmail/webmail/releases/latest/download/bulwark-webmail.tar.gz -O /tmp/bulwark-webmail.tar.gz
+- sudo tar -xzf /tmp/bulwark-webmail.tar.gz -C /var/www/bulwark-webmail
+- rm -f /tmp/bulwark-webmail.tar.gz
+- sudo mv /tmp/bulwark-data-bak /var/www/bulwark-webmail/data 2>/dev/null
+- Installs required packages and locks down security permissions.
+Navigate to the directory and run:
+
 ```bash
-   export DEPLOY_DIR="/var/www/bulwark-webmail"
-   export APP_USER="www-data"
+# Move into the app folder
+cd /var/www/bulwark-webmail
 
-```
-[ -d "$DEPLOY_DIR/data" ] && sudo mv "$DEPLOY_DIR/data" /tmp/bulwark-data-bak
-
-sudo mkdir -p "$DEPLOY_DIR"
-
-LATEST_URL=$(curl -s [https://api.github.com/repos/YOUR_GITHUB_REPO/releases/latest](https://api.github.com/repos/YOUR_GITHUB_REPO/releases/latest) | jq -r '.assets[] | select(.name=="bulwark-webmail.tar.gz") | .browser_download_url')
-curl -L -s -o /tmp/bulwark-webmail.tar.gz "$LATEST_URL"
-
-sudo tar -xzf /tmp/bulwark-webmail.tar.gz -C "$DEPLOY_DIR"
-rm -f /tmp/bulwark-webmail.tar.gz
-
-if [ -d "/tmp/bulwark-data-bak" ]; then
-  sudo mv /tmp/bulwark-data-bak "$DEPLOY_DIR/data"
-else
-  sudo mkdir -p "$DEPLOY_DIR/data/settings" "$DEPLOY_DIR/data/admin" "$DEPLOY_DIR/data/admin-state"
-fi
-
-
-
-- Install Node production dependencies as the application user:
-```bash
-cd "$DEPLOY_DIR"
+# Install production dependencies
 sudo -u $APP_USER npm install --omit=dev --no-audit --ignore-scripts --no-fund
 
-```
-
-
-- Apply safe permissions across the application directory:
-```bash
+# Set ownership and safe file permissions
 sudo chown -R $APP_USER:$APP_USER "$DEPLOY_DIR"
 sudo find "$DEPLOY_DIR" -type d -exec chmod 755 {} \;
 sudo find "$DEPLOY_DIR" -type f -exec chmod 644 {} \;
 
-# Restore execution privileges for binaries
+# Allow executable binaries to run
 if [ -d "$DEPLOY_DIR/node_modules/.bin" ]; then
   sudo chmod -R 755 "$DEPLOY_DIR/node_modules/.bin"
   sudo find "$DEPLOY_DIR/node_modules/next/dist/bin" -type f -exec chmod 755 {} \; 2>/dev/null || true
 fi
 
 ```
+-  Configures systemd to automatically run the app in the background.
+Create the file `/etc/systemd/system/bulwark-webmail.service` using your favorite editor (e.g., `sudo nano /etc/systemd/system/bulwark-webmail.service`) and paste:
 
-- Create a service file `/etc/systemd/system/bulwark-webmail.service`:
 ```ini
 [Unit]
 Description=Bulwark Webmail Service
@@ -1035,22 +1030,23 @@ WantedBy=multi-user.target
 
 ```
 
+Then, reload system service rules and start Webmail:
 
-- Enable and start the background service:
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl enable --now bulwark-webmail
 
 ```
+-  Routes web traffic to your Node.js application.
+Enable the necessary Apache modules:
 
-- Enable required Apache modules:
 ```bash
 sudo a2enmod proxy proxy_http proxy_wstunnel rewrite headers
 
 ```
 
+- Create `/etc/apache2/sites-available/bulwark-webmail.conf` and paste the following (make sure to replace `your-domain.com`):
 
-- Create `/etc/apache2/sites-available/bulwark-webmail.conf` (replace `your-domain.com`, `127.0.0.1`, and `3000` with your configuration):
 ```apache
 <VirtualHost *:80>
     ServerName your-domain.com
@@ -1084,54 +1080,49 @@ sudo a2enmod proxy proxy_http proxy_wstunnel rewrite headers
 
 ```
 
+- Enable the new web site config and restart Apache:
 
-- Enable the virtual host and restart Apache:
 ```bash
 sudo a2ensite bulwark-webmail.conf
 sudo systemctl restart apache2
 
 ```
-- `sudo certbot --apache -d your-domain.com`
+
+- Run Certbot
+
+```bash
+sudo certbot --apache -d web.DOMAIN
+
+```
 
 ## Aurion API
-sudo mkdir aurion-core
-
-cd aurion-core/
-
-sudo wget https://github.com/AurionMail/core-api/releases/download/0.0.2/aurion-api
-
-sudo nano .env
-
-sudo -u postgres psql
-
-postgres=# CREATE DATABASE aurionapidb OWNER aurionuser;
-CREATE DATABASE
-postgres=# CREATE USER aurioapinuser WITH PASSWORD 'pass';
-CREATE ROLE
-postgres=# CREATE DATABASE aurionapi OWNER aurioapinuser;
-CREATE DATABASE
-postgres=# \c aurionapi
-You are now connected to database "aurionapi" as user "postgres".
-aurionapi=# GRANT ALL ON SCHEMA public TO aurioapinuser;
-GRANT
-aurionapi=# ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO aurioapinuser;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO aurioapinuser;
-ALTER DEFAULT PRIVILEGES
-ALTER DEFAULT PRIVILEGES
-aurionapi=# exit
-
-sudo wget https://raw.githubusercontent.com/AurionMail/core-api/refs/heads/main/migrations/init.sql
-
-
-psql -h localhost -U aurionuser -d auriondb -f migrations/init.sql
-
-sudo chmod -R 750 ./aurion-core
-sudo chown -R www-data:www-data ./aurion-core
-sudo chmod +x ./aurion-api
-
-
-Create the file /etc/systemd/system/aurion.service:
-
+- sudo mkdir aurion-core
+- cd aurion-core/
+- sudo wget https://github.com/AurionMail/core-api/releases/download/0.0.2/aurion-api
+- sudo nano .env
+- sudo -u postgres psql
+- postgres=# CREATE DATABASE aurionapidb OWNER aurionuser;
+- CREATE DATABASE
+- postgres=# CREATE USER aurioapinuser WITH PASSWORD 'pass';
+- CREATE ROLE
+- postgres=# CREATE DATABASE aurionapi OWNER aurioapinuser;
+- CREATE DATABASE
+- postgres=# \c aurionapi
+- You are now connected to database "aurionapi" as user "postgres".
+- aurionapi=# GRANT ALL ON SCHEMA public TO aurioapinuser;
+- GRANT
+- aurionapi=# ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO aurioapinuser;
+- ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO aurioapinuser;
+- ALTER DEFAULT PRIVILEGES
+- ALTER DEFAULT PRIVILEGES
+- aurionapi=# exit
+- sudo wget https://raw.githubusercontent.com/AurionMail/core-api/refs/heads/main/migrations/init.sql
+- psql -h localhost -U aurionuser -d auriondb -f migrations/init.sql
+- sudo chmod -R 750 ./aurion-core
+- sudo chown -R www-data:www-data ./aurion-core
+- sudo chmod +x ./aurion-api
+- Create the file /etc/systemd/system/aurion.service:
+```
 [Unit]
 Description=Aurion Core Server
 After=network.target postgresql.service
@@ -1153,9 +1144,9 @@ Enable and start the service:
 sudo systemctl daemon-reload
 sudo systemctl enable aurion
 sudo systemctl start aurion
-
-conf apache
-
+```
+- Add apache conf
+```
 <VirtualHost *:80>
     ServerName aurion.mail.DOMAIN
 
@@ -1173,9 +1164,9 @@ RewriteEngine on
 RewriteCond %{SERVER_NAME} =aurion.mail.DOMAIN
 RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 </VirtualHost>
+```
 
-
-- then cerbot
+- then enable cerbot
 
 # Configure Auth
 
@@ -1209,7 +1200,7 @@ Auto SSO : Y
 
 ### Conf Stalwart
 
-Authentication->Directories 
+Navigate to webUI with your admin accounts, then : Authentication->Directories 
 
 Issuer URL : https://oauth.DOMAIN
 Required Audience : null
