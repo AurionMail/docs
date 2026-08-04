@@ -17,6 +17,7 @@ jobs:
       - name: Create folder structure
         run: |
           mkdir -p aurionmail/hydra
+          mkdir -p aurionmail/hydra/{bin,config}
           mkdir -p aurionmail/api
           mkdir -p aurionmail/sso
           mkdir -p aurionmail/bridges
@@ -31,7 +32,7 @@ jobs:
           
           echo "Downloading Hydra version: $HYDRA_TAG"
           curl -L "https://github.com/ory/hydra/releases/download/${HYDRA_TAG}/hydra_${HYDRA_VERSION}-linux_64bit.tar.gz" -o hydra.tar.gz
-          tar -xzf hydra.tar.gz -C aurionmail/hydra
+          tar -xzf hydra.tar.gz -C aurionmail/hydra/bin
           rm hydra.tar.gz
 
       - name: Download API binary
