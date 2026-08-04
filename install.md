@@ -201,21 +201,21 @@ HYDRA_ADMIN_URL=http://localhost:4445
 ORY_API_KEY=YOUR_API_KEY
 LDAP_URL=ldap://127.0.0.1:3890
 LDAP_USER_DN_PATTERN=uid={username},ou=people,dc=DOMAIN,dc=org
-WEBMAIL_DOMAIN_WP=https://officialweb.mail.DOMAIN
+WEBMAIL_DOMAIN_WP=https://web.DOMAIN
 CRYPTPAD_DOMAIN_WP=https://pad.DOMAIN
-CORE_API_URL=https://aurion.mail.DOMAIN
+CORE_API_URL=https://api.DOMAIN
 CORE_API_INTERNAL_SECRET=yourSecret
 ```
 - sudo nano /etc/systemd/system/aurion-sso.service and add
 ```
 [Unit]
-Description=Ory Hydra Login and Consent Node App
+Description=Aurion SSO
 After=network.target
 
 [Service]
 Type=simple
-User=hydra
-WorkingDirectory=/opt/sso
+User=aurion
+WorkingDirectory=/home/aurion/aurionmail/sso
 ExecStart=/usr/bin/npm run serve
 Restart=always
 RestartSec=5
@@ -383,15 +383,10 @@ SSLStaplingCache "shmcb:${APACHE_RUN_DIR}/ssl_stapling(32768)"
 
 //const fs = require('node:fs');
 module.exports = {
-    // Enable SSO login on this instance
     enabled: true,
-    // Block registration for non-SSO users on this instance
     enforced: true,
-    // Allow users to add an additional CryptPad password to their SSO account
     cpPassword: true,
-    // You can also force your SSO users to add a CryptPad password
     forceCpPassword: true,
-    // List of SSO providers
     list: [
    {
         name: 'Aurion SSO',
@@ -499,6 +494,8 @@ sudo systemctl enable --now bulwark-webmail
         Require all granted
     </Proxy>
 
+    ProxyPass "/bridge-minimal.html" !
+
     # Routing WebSockets (Next.js)
     RewriteEngine On
     RewriteCond %{HTTP:Upgrade} =websocket [NC]
@@ -511,6 +508,13 @@ sudo systemctl enable --now bulwark-webmail
     RequestHeader set X-Forwarded-Port "80"
     Header always set X-Content-Type-Options "nosniff"
     Header always set X-Frame-Options "SAMEORIGIN"
+
+    Alias "/bridge-minimal.html" "/home/aurion/aurionmail/bridges/bridge-minimal.html"
+
+    <Location "/bridge-minimal.html">
+        Header always set Content-Security-Policy "frame-ancestors https://sso.DOMAIN"
+        Require all granted
+    </Location>
 
     ErrorLog ${APACHE_LOG_DIR}/bulwark-webmail-error.log
     CustomLog ${APACHE_LOG_DIR}/bulwark-webmail-access.log combined
@@ -528,23 +532,15 @@ sudo certbot --apache -d web.DOMAIN
 - cd /home/aurion/aurionmail/api
 - sudo nano .env
 - sudo -u postgres psql
-- postgres=# CREATE DATABASE aurionapidb OWNER aurionuser;
-- CREATE DATABASE
-- postgres=# CREATE USER aurioapinuser WITH PASSWORD 'pass';
-- CREATE ROLE
-- postgres=# CREATE DATABASE aurionapi OWNER aurioapinuser;
-- CREATE DATABASE
-- postgres=# \c aurionapi
-- You are now connected to database "aurionapi" as user "postgres".
-- aurionapi=# GRANT ALL ON SCHEMA public TO aurioapinuser;
-- GRANT
-- aurionapi=# ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO aurioapinuser;
-- ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO aurioapinuser;
-- ALTER DEFAULT PRIVILEGES
-- ALTER DEFAULT PRIVILEGES
-- aurionapi=# exit
+- CREATE USER aurionUSER WITH PASSWORD 'pass';
+- CREATE DATABASE aurionDB OWNER aurionUSER;
+- \c aurionDB
+- GRANT ALL ON SCHEMA public TO aurionUSER;
+- ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO aurionUSER;
+- ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO aurionUSER;
+- exit
 - sudo wget https://raw.githubusercontent.com/AurionMail/core-api/refs/heads/main/migrations/init.sql
-- psql -h localhost -U aurionuser -d auriondb -f migrations/init.sql
+- psql -h localhost -U aurionUSER -d aurionDB -f migrations/init.sql
 - sudo chmod -R 750 ./aurion-core
 - sudo chmod +x ./aurion-api
 - Create the file /etc/systemd/system/aurion.service:
@@ -555,7 +551,7 @@ After=network.target postgresql.service
 
 [Service]
 Type=simple
-User=www-data
+User=aurion
 WorkingDirectory=/home/aurion/aurionmail/api
 ExecStart=/home/aurion/aurionmail/api/aurion-api
 Restart=always
@@ -574,7 +570,7 @@ sudo systemctl start aurion
 - Add apache conf
 ```
 <VirtualHost *:80>
-    ServerName aurion.mail.DOMAIN
+    ServerName api.DOMAIN
 
     ProxyPreserveHost On
     ProxyPass / http://localhost:8070/
@@ -629,7 +625,7 @@ Go to admin ui : https://web.DOMAIN/admin then Authentication :
 - OAuth Only : Activated
 - OAuthClientID: stalwart 
 - OAuth Client Secret : SECRET_BULWARK_SSO 
-- OAuth Issuer URL : https://auth.DOMAIN
+- OAuth Issuer URL : https://oauth.DOMAIN
 - Auto SSO : Activated
 
 ### Conf Stalwart
