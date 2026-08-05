@@ -16,7 +16,7 @@ urls:
 
 secrets:
   system:
-    - GENERATE_A_COOL_SECRET
+    - HYDRA_SYSTEM_SECRET
 
 oidc:
   subject_identifiers:
@@ -24,4 +24,4 @@ oidc:
       - pairwise
       - public
     pairwise:
-      salt: GENERATE_A_COOL_SECRET
+      salt: HYDRA_PAIRWISE_SALT

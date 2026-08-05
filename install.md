@@ -29,11 +29,33 @@ For testing with up to 30 users, 2GB cheap VPS is enough. In this tutorial, we w
 | **SSO App** | Application SSO | `127.0.0.1:3030` | `sso.` | `aurion` | `MANUAL` |/home/aurion/aurionmail/sso |
 | **Cryptpad** | Web App  | `127.0.0.1:3010` | `pad.` / `sand.` | `pad` | `MANUAL` |/home/pad/cryptpad/ |
 | **Cryptpad** | WebSockets | `127.0.0.1:3013` | `pad.` / `sand.` | `pad` | `MANUAL` | /home/pad/cryptpad|
-| **Bulwark Webmail** | Webmail UI | `127.0.0.1:3000` | `web.` | `user` | `MANUAL` |/home/bulwark/webmail |
+| **Bulwark Webmail** | Webmail UI | `127.0.0.1:3000` | `web.` | `bulwark` | `MANUAL` |/home/bulwark/webmail |
 | **Aurion API** | API | `127.0.0.1:8070` | `api.` | `aurion` | `MANUAL` | /home/aurion/aurionmail/api |
 | **Stalwart** | Mail Server | `127.0.0.1:8080` | `mail.` | `stalwart` | `MANUAL` | /opt/stalwart |
-| **Bridges** | Bridges | *Integrade with reverse proxy* | - | `aurion` | `MANUAL` |/home/aurion/aurionmail/bridges  |
-
+| **Bridges** | Bridges | *Integrated with reverse proxy* | - | `aurion` | `MANUAL` |/home/aurion/aurionmail/bridges  |
+## Users
+We need to create 2 users : `aurion`, `bulwark` and `pad`. `aurion` will handle the auth of the users, keys and core API. 
+- useradd -s /bin/false -m aurion
+- useradd -s /bin/false -m bulwark
+- useradd -s /bin/false -m pad
+## Secrets
+You will need to generate some secrets during the installation process. You can use `openssl rand -base64 100 | tr -dc 'a-zA-Z0-9' | head -c 64; echo` to do it and replace
+### LDAP
+- LDAP_JWT
+### Hydra
+- HYDRA_PASSWORD
+- HYDRA_PAIRWISE_SALT
+- HYDRA_SYSTEM_SECRET
+### Stalwart
+- STALWART_ADMIN_PASSWORD
+### Bulwark
+- SECRET_BULWARK_SSO
+### Cryptpad
+- SECRET_CRYPTPAD_SSO
+### Aurion API
+- AURION_API_INTERNAL_SECRET
+- AURION_JWT_SECRET
+- AURION_DB_PASSWORD
 ## LDAP
 - We use lldap from the [debian repo](https://software.opensuse.org//download.html?project=home%3AMasgalor%3ALLDAP&package=lldap) :
 ```
@@ -46,14 +68,13 @@ sudo apt install lldap
 - edit conf file at `/etc/lldap/lldap_config.toml`
     - ldap_host = "127.0.0.1"
     - http_host = "127.0.0.1"
-    - jwt_secret = "GENERATE"
+    - jwt_secret = "LDAP_JWT"
     - ldap_base_dn = "dc=DOMAINSTART,dc=DOMAINEND" :  for refernece, with aurionmail.org, we would use dc=aurionmail,dc=org
 The default admin user is admin / password . Once connected throught the webUI, delete it and add a new admin user.
 - add the webserver conf file, add https and enable it
     - [apache](./conf/apache/ldap.conf)
     - [nginx](./conf/nginx/ldap.domain)
 ## Install Aurion
-- useradd -s /bin/false -m aurion 
 - sudo -u aurion bash
 - get latest release zip : wget https://github.com/AurionMail/docs/releases/download/0.0.2/aurionmail.zip
 - unzip aurionmail.zip
@@ -111,7 +132,6 @@ We use this app to check credential against LDAP and let the user consent to giv
     - [nginx](./conf/nginx/sso.domain)
 
 ## Cryptpad
-- useradd -s /bin/false -m pad
 - sudo -u pad bash
 - wget https://github.com/AurionMail/docs/releases/download/0.0.2/cryptpad.zip 
 - unzip cryptpad.zip 
@@ -138,12 +158,12 @@ We use this app to check credential against LDAP and let the user consent to giv
 - now you can run `systemctl status cryptpad.service` to get the admin temp key used to create the first admin and initiliaze Cryptpad.
 ## Stalwart Web Server
 ### Installation
-Run the  at [Installlation Script](https://stalw.art/docs/install/platform/linux/) provided by Stalwart and config it as usually.
+Run the [Installlation Script](https://stalw.art/docs/install/platform/linux/) provided by Stalwart and config it as usually.
 - add the webserver conf file, add https and enable it
     - [apache](./conf/apache/mail.conf)
     - [nginx](./conf/nginx/mail.domain)
 
-Warning : We will soon enable the OIDC provider in stalwart. As a result, we won't be able to connect to admin account in admin webUI. So, you need to add the env variable STALWART_RECOVERY_ADMIN=admin:cool_password.
+Warning : We will soon enable the OIDC provider in stalwart. As a result, we won't be able to connect to admin account in admin webUI. So, you need to add the env variable STALWART_RECOVERY_ADMIN=admin:STALWART_ADMIN_PASSWORD.
 - sudo nano /etc/stalwart/stalwart.env
 - Now, go to admin/Settings/x:Http/HttpSecurity/singleton and check permissve CORS to allow bulwark to connect.
 ## Bulwark Webmail

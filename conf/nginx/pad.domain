@@ -25,7 +25,7 @@ server {
     ssl_certificate /etc/letsencrypt/live/pad.DOMAIN_REPLACE_ME/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/pad.DOMAIN_REPLACE_ME/privkey.pem;
 
-    ssl_dhparam /etc/nginx/dhparam.pem; # Si le fichier n'existe pas : openssl dhparam -out /etc/nginx/dhparam.pem 2048
+    ssl_dhparam /etc/nginx/dhparam.pem; # if doesn' exist : openssl dhparam -out /etc/nginx/dhparam.pem 2048
 
     # Optimisation SSL & HSTS
     ssl_session_timeout 1d;
