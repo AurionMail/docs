@@ -169,6 +169,7 @@ Warning : We will soon enable the OIDC provider in stalwart. As a result, we won
 Some servers do not have enough CPU to build the app, so we let github build it and we download.  
 - sudo -u bulwark bash
 - wget https://github.com/bulwarkmail/webmail/releases/download/1.7.8/bulwark-standalone-1.7.8-linux-amd64.tar.gz 
+- tar -xvf bulwark-standalone-1.7.8-linux-amd64.tar.gz
 - sudo chmod -R 755 /home/bulwark/webmail/node_modules/.bin
 - sudo find /home/bulwark/webmail/node_modules/next/dist/bin -type f -exec chmod 755 {} \; 2>/dev/null || true
 - sudo nano /etc/systemd/system/bulwark-webmail.service and add the content of the [service file](./conf/systemd/bulwark-webmail.service)
