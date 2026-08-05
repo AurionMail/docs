@@ -1,0 +1,19 @@
+[Unit]
+Description=Bulwark Webmail Service
+After=network.target
+
+[Service]
+Type=simple
+User=bulwark
+Group=bulwark
+WorkingDirectory=/home/bulwark/webmail
+ExecStart=/usr/bin/npm start
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=bulwark-webmail
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target

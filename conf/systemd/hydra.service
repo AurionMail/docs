@@ -1,0 +1,16 @@
+[Unit]
+Description=Hydra Service
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=aurion
+Environment=SERVE_ADMIN_HOST=127.0.0.1
+Environment=SERVE_PUBLIC_HOST=127.0.0.1
+ExecStart=/home/aurion/aurionmail/hydra/bin/hydra -c /home/aurion/aurionmail/hydra/config/hydra.yml serve all
+
+[Install]
+WantedBy=multi-user.target

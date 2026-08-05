@@ -13,10 +13,10 @@ You need a domain name. We assume this from this domain will send emails Add the
 
 For testing with up to 30 users, 2GB cheap VPS is enough. In this tutorial, we will to use
 - debian 13
-- apache2 (I know..., ngix and caddy come soon)
+- apache2 or NGINX
 - certbot
 - postgresql for the Aurion API DB
-- nodeJS 22 LTS
+- nodeJS 24 LTS
 ## Cheatsheet
 
 | Service |  Port Usage | Adress & Port | Domain | User | Update type | Path |
@@ -34,31 +34,23 @@ For testing with up to 30 users, 2GB cheap VPS is enough. In this tutorial, we w
 | **Bridges** | Bridges | *Integrade with reverse proxy* | - | `aurion` | `MANUAL` |/home/aurion/aurionmail/bridges  |
 
 ## LDAP
-- We use lldap from the [debian repo](https://software.opensuse.org//download.html?project=home%3AMasgalor%3ALLDAP&package=lldap)
+- We use lldap from the [debian repo](https://software.opensuse.org//download.html?project=home%3AMasgalor%3ALLDAP&package=lldap) :
+```
+echo 'deb http://download.opensuse.org/repositories/home:/Masgalor:/LLDAP/Debian_13/ /' | sudo tee /etc/apt/sources.list.d/home:Masgalor:LLDAP.list
+curl -fsSL https://download.opensuse.org/repositories/home:Masgalor:LLDAP/Debian_13/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_Masgalor_LLDAP.gpg > /dev/null
+sudo apt update
+sudo apt install lldap
+```
 - `sudo apt install lldap lldap-extras`
 - edit conf file at `/etc/lldap/lldap_config.toml`
     - ldap_host = "127.0.0.1"
     - http_host = "127.0.0.1"
     - jwt_secret = "GENERATE"
     - ldap_base_dn = "dc=DOMAIN,dc=DOMAINEND" :  for refernece, with aurionmail.org, we would use dc=aurionmail,dc=org
-
-- Add the apache conf file :
-```
-<VirtualHost *:80>
-    ServerName ldap.DOMAIN.org
-
-    ProxyPreserveHost On
-    ProxyPass / http://127.0.0.1:17170/
-    ProxyPassReverse / http://127.0.0.1:17170/
-
-    RequestHeader set X-Forwarded-Proto "http"
-    RequestHeader set X-Forwarded-Host "ldap.DOMAIN.org"
-
-    ErrorLog ${APACHE_LOG_DIR}/lldap-admin_error.log
-    CustomLog ${APACHE_LOG_DIR}/lldap-admin_access.log combined
-</VirtualHost>
-```
-- of course, use certbot to enable https.
+The default admin user is admin / password . Once connected throught the webUI, delete it and add a new admin user.
+- add the webserver conf file, add https and enable it
+    - [apache](./conf/apache/ldap.conf)
+    - [nginx](./conf/nginx/ldap.domain)
 ## Install Aurion
 - useradd -s /bin/false -m aurion 
 - sudo -u aurion bash
@@ -72,12 +64,14 @@ You have now installed the API, Hydra, the SSO app and the bridges. Now, let's c
 - psql
 - ALTER SYSTEM SET password_encryption = 'scram-sha-256';
 - SELECT pg_reload_conf();
-- CREATE USER hydra PASSWORD '<YOUR_PASSWORD_HERE>';
-- nano /etc/postgresql/15/main/pg_hba.conf
-- add host    all             all             127.0.0.1/32            scram-sha-256
-- psql -U hydra -W -h 127.0.0.1 and type password
+- CREATE USER hydra PASSWORD 'HYDRA_PASSWORD';
+- exit;
+- nano /etc/postgresql/17/main/pg_hba.conf
+- add `host    all             all             127.0.0.1/32            scram-sha-256`
+- `psql -U hydra -W -h 127.0.0.1`
+- type password to check
 
-- sudo -i -u postgres psql -d hydra
+- psql -d hydra
 - GRANT ALL ON SCHEMA public TO hydra;
 - GRANT USAGE ON SCHEMA public TO hydra;
 - ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO hydra;
@@ -87,102 +81,16 @@ You have now installed the API, Hydra, the SSO app and the bridges. Now, let's c
 - \q
 
 - nano /home/aurion/aurionmail/hydra/config/hydra.yml
-- paste
-```
-serve:
-  cookies:
-    same_site_mode: Lax
-dsn: postgres://hydra:<YOUR_PASSWORD_HERE>@127.0.0.1:5432/hydra?sslmode=disable&max_conns=20&max_idle_conns=4
-urls:
-  self:
-    issuer: https://oauth.DOMAIN
-  consent: https://sso.DOMAIN/consent
-  login: https://sso.DOMAIN/login
-  logout: https://sso.DOMAIN/logout
-  post_logout_redirect: https://sso.DOMAIN/exited
-
-  device:
-    verification: https://sso.DOMAIN/device/verify
-    success: https://sso.DOMAIN/device/success
-
-secrets:
-  system:
-    - RandomThingsLikeBlablalalalala
-
-oidc:
-  subject_identifiers:
-    supported_types:
-      - pairwise
-      - public
-    pairwise:
-      salt: RandomThingsLikeBlablalalalalalouzuzz
-```
+- paste the content of [Hydra Conf file](./conf/hydra/hydra.yml)
 - apply migrations with /home/aurion/aurionmail/hydra/bin/hydra -c /home/aurion/aurionmail/hydra/config/hydra.yml migrate sql up
 
-- nano /etc/systemd/system/hydra.service and paste
-```
-[Unit]
-Description=Hydra Service
-After=network.target
-StartLimitIntervalSec=0
-
-[Service]
-Type=simple
-Restart=always
-RestartSec=1
-User=aurion
-Environment=SERVE_ADMIN_HOST=127.0.0.1
-Environment=SERVE_PUBLIC_HOST=127.0.0.1
-ExecStart=/home/aurion/aurionmail/hydra/bin/hydra -c /home/aurion/aurionmail/hydra/config/hydra.yml serve all
-
-[Install]
-WantedBy=multi-user.target
-```
+- nano /etc/systemd/system/hydra.service and paste the content of [hydra.service](./conf/systemd/hydra.service)
 - systemctl enable hydra.service
 - systemctl start hydra.service
 - systemctl status hydra.service to check if all is OK
-
-- sudo nano /etc/apache2/sites-available/hydra.conf and paste
-```
-<VirtualHost *:80>
-    ServerName oauth.DOMAIN
-
-    # Certbot
-    DocumentRoot /var/www/html
-    <Directory /var/www/html/.well-known/acme-challenge/>
-        Options None
-        AllowOverride None
-        Require all granted
-    </Directory>
-
-    RewriteEngine On
-    RewriteCond %{REQUEST_URI} !^/\.well-known/acme-challenge/
-    RewriteRule ^/(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
-</VirtualHost>
-
-<VirtualHost *:443>
-    ServerName oauth.DOMAIN
-
-    SSLEngine on
-    SSLCertificateFile /etc/letsencrypt/live/oauth.DOMAIN/fullchain.pem
-    SSLCertificateKeyFile /etc/letsencrypt/live/oauth.DOMAIN/privkey.pem
-    Include /etc/letsencrypt/options-ssl-apache.conf
-
-    ProxyPreserveHost On
-    RequestHeader set X-Real-IP "%{REMOTE_ADDR}s"
-    RequestHeader set X-Forwarded-Proto "https"
-
-    <LocationMatch "^/(.well-known|oauth2/auth|oauth2/token|oauth2/sessions|oauth2/revoke|oauth2/fallbacks/consent|oauth2/fallbacks/error|userinfo)(/.*)?$">
-        Require all granted
-        ProxyPass http://127.0.0.1:4444
-        ProxyPassReverse http://127.0.0.1:4444
-    </LocationMatch>
-
-</VirtualHost>
-```
-- sudo certbot certonly --apache -d oauth.DOMAIN
-- sudo a2ensite hydra.conf 
-- sudo systemctl restart apache2
+- add the webserver conf file, add https and enable it
+    - [apache](./conf/apache/oauth.conf)
+    - [nginx](./conf/nginx/oauth.domain)
 
 At this point, Hydra and LDAP are installed but they don't speak to them. It is normal, and they never do this. We need to install the SSO App
 ## SSO App
@@ -192,421 +100,112 @@ We use this app to check credential against LDAP and let the user consent to giv
 ### Installation
 - cd /home/aurion/aurionmail/sso
 - cp .example.env .env
-- sudo nano .env and add the .env with your values. You can also add them to your .service file (next line) but a .env must be present (even empty) :
-```
-PORT=3030
-BASE_URL=https://sso.DOMAIN
-HYDRA_ADMIN_URL=http://localhost:4445
-# Only used in paid version of Ory Hydra
-ORY_API_KEY=YOUR_API_KEY
-LDAP_URL=ldap://127.0.0.1:3890
-LDAP_USER_DN_PATTERN=uid={username},ou=people,dc=DOMAIN,dc=org
-WEBMAIL_DOMAIN_WP=https://web.DOMAIN
-CRYPTPAD_DOMAIN_WP=https://pad.DOMAIN
-CORE_API_URL=https://api.DOMAIN
-CORE_API_INTERNAL_SECRET=yourSecret
-```
-- sudo nano /etc/systemd/system/aurion-sso.service and add
-```
-[Unit]
-Description=Aurion SSO
-After=network.target
-
-[Service]
-Type=simple
-User=aurion
-WorkingDirectory=/home/aurion/aurionmail/sso
-ExecStart=/usr/bin/npm run serve
-Restart=always
-RestartSec=5
-[Install]
-WantedBy=multi-user.target
-```
+- nano .env and add the .env with [your values](./conf/env/sso/.env). You can also add them to your .service file (next line) but a .env must be present (even empty) :
+- sudo nano /etc/systemd/system/aurion-sso.service and add the content of the [service file](./conf/systemd/aurion-sso.service)
 - sudo systemctl daemon-reload
 - sudo systemctl start aurion-sso.service
 - sudo systemctl enable aurion-sso.service
+- add the webserver conf file, add https and enable it
+    - [apache](./conf/apache/sso.conf)
+    - [nginx](./conf/nginx/sso.domain)
 
--  sudo nano /etc/apache2/sites-available/sso.conf (used to let certbot do its works)
-```
-# --- Configuration HTTP (Port 80) ---
-<VirtualHost *:80>
-    ServerName sso.DOMAIN
-    DocumentRoot /var/www/html
-    <Directory /var/www/html/.well-known/acme-challenge/>
-        Options None
-        AllowOverride None
-        Require all granted
-    </Directory>
-    RewriteEngine On
-    RewriteCond %{REQUEST_URI} !^/\.well-known/acme-challenge/
-    RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [R=301,L]
-
-    ErrorLog ${APACHE_LOG_DIR}/mon-domaine-error.log
-    CustomLog ${APACHE_LOG_DIR}/mon-domaine-access.log combined
-</VirtualHost>
-```
-- sudo a2ensite sso.conf
-- sudo systemctl reload apache2
-- sudo certbot --apache
-- sudo nano /etc/apache2/sites-available/sso-le-ssl.conf and add reverse proxy
-
-```                               
-<IfModule mod_ssl.c>
-<VirtualHost *:443>
-    ServerName sso.DOMAIN
-    DocumentRoot /var/www/html
-
-    <Directory /var/www/html/.well-known/acme-challenge/>
-        Options None
-        AllowOverride None
-        Require all granted
-    </Directory>
-
-    RewriteEngine On
-
-    ProxyPreserveHost On
-    ProxyPass / http://127.0.0.1:3030/
-    ProxyPassReverse / http://127.0.0.1:3030/
-
-    RequestHeader set X-Forwarded-Proto "https"
-    RequestHeader set X-Forwarded-Port "443"
-
-    ErrorLog ${APACHE_LOG_DIR}/mon-domaine-error.log
-    CustomLog ${APACHE_LOG_DIR}/mon-domaine-access.log combined
-
-SSLCertificateFile /etc/letsencrypt/live/sso.DOMAIN/fullchain.pem
-SSLCertificateKeyFile /etc/letsencrypt/live/sso.DOMAIN/privkey.pem
-Include /etc/letsencrypt/options-ssl-apache.conf
-</VirtualHost>
-</IfModule>
-```
 ## Cryptpad
 - useradd -s /bin/false -m pad
+- sudo -u pad bash
 - wget https://github.com/AurionMail/docs/releases/download/0.0.2/cryptpad.zip 
 - unzip cryptpad.zip 
 - cd cryptpad/config
 - cp config.example.js config.js
 - cp sso.example.js sso.js
-- follow instrcutons at https://docs.cryptpad.org/en/admin_guide/installation.html from "configuration" or "onlyoffice" if you want.
+- follow instrcutons at https://docs.cryptpad.org/en/admin_guide/installation.html from "configuration" or "onlyoffice" if you want. In facts, you can just add teh crontab, the rest is alerady done or will be done in this guide.
 - nano config.js and edit this values :
     - httpUnsafeOrigin: 'https://pad.DOMAIN',
     - httpSafeOrigin: "https://sand.DOMAIN",
+    - httpAddress: '127.0.0.1',
     - httpPort: 3010,
     - httpSafePort: 3011,
     - websocketPort: 3013,
     - installMethod: 'aurion',
-- nano /etc/apache2/sites-available/pad.conf
-```
-# SPDX-FileCopyrightText: 2023 XWiki CryptPad Team <contact@cryptpad.org> and contributors
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
+- nano /etc/systemd/system/cryptpad.service and paste the content of [hydra.service](./conf/systemd/cryptpad.service)
+- add the webserver conf file, add https and enable it
+    - [apache](./conf/apache/pad.conf)
+    - [nginx](./conf/nginx/pad.domain)
 
-#   This file is included strictly as an example of how Apache httpd can be
-#   configured to work with CryptPad. If you are using CryptPad in production
-#   and require professional support please contact sales@cryptpad.org
-
-#   This configuration requires mod_ssl, mod_socache_shmcb, mod_proxy,
-#   mod_proxy_http and mod_headers
-
-#Listen 443
-
-SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384
-SSLProxyCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384
-SSLHonorCipherOrder off
-SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1
-SSLProxyProtocol all -SSLv3 -TLSv1 -TLSv1.1
-SSLSessionCache "shmcb:${APACHE_RUN_DIR}/ssl_scache(512000)"
-SSLSessionCacheTimeout 86400
-SSLSessionTickets off
-SSLUseStapling on
-SSLStaplingCache "shmcb:${APACHE_RUN_DIR}/ssl_stapling(32768)"
-
-<VirtualHost *:443>
-  ServerName pad.DOMAIN
-  ServerAlias sand.DOMAIN
-  Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains"
-
-
- SSLEngine on
-  SSLCertificateFile /etc/letsencrypt/live/DOMAIN/cert.pem
-  SSLCertificateKeyFile /etc/letsencrypt/live/DOMAIN/privkey.pem
-   
-  BrowserMatch "MSIE [2-5]" \
-        nokeepalive ssl-unclean-shutdown \
-        downgrade-1.0 force-response-1.0
-   
-  Protocols h2 http/1.1
-  AddType application/javascript mjs
-
-  # =============================================================
-  # AURION PROXY RULES
-  # =============================================================
-  RewriteEngine On
-
-  RewriteCond %{REQUEST_URI} ^/login$
-  RewriteCond %{QUERY_STRING} !(^|&)from=aurion(&|$) [NC]
-  RewriteRule ^ https://web.DOMAIN [R=302,L]
-
-  ProxyPass "/bridge-minimal.html" !
-  ProxyPass "/bridge-sand.html" !
-
-  ProxyPass "/cryptpad_websocket" "http://localhost:3013/" upgrade=websocket
-  ProxyPassReverse "/cryptpad_websocket" "http://localhost:3013/"
-
-  ProxyPass "/" "http://localhost:3010/" upgrade=websocket
-  ProxyPassReverse "/" "http://localhost:3010/"
-
-  Alias "/bridge-minimal.html" "/home/aurion/aurionmail/bridges/bridge-minimal.html"
-
-  <Location "/bridge-minimal.html">
-     Header always set Content-Security-Policy "frame-ancestors https://web.DOMAIN https://sso.DOMAIN"
-     Require all granted
-  </Location>
-
- Alias "/bridge-sand.html" "/home/aurion/aurionmail/bridges/bridge-sand.html"
-
-  <Location "/bridge-sand.html">
-     Header always set Content-Security-Policy "frame-ancestors https://pad.DOMAIN https://web.DOMAIN https://sso.DOMAIN"
-     Require all granted
-  </Location>
-
-  LimitRequestBody 157286400
-
-</VirtualHost>
-
-```
-- nano /home/pad/cryptpad/config/sso.js
-```
-// SPDX-FileCopyrightText: 2023 XWiki CryptPad Team <contact@cryptpad.org> and contributors
-//
-// SPDX-License-Identifier: AGPL-3.0-or-later
-
-//const fs = require('node:fs');
-module.exports = {
-    enabled: true,
-    enforced: true,
-    cpPassword: true,
-    forceCpPassword: true,
-    list: [
-   {
-        name: 'Aurion SSO',
-        type: 'oidc',
-        url: 'https://oauth.DOMAIN',
-        client_id: 'cryptpad',
-        client_secret: 'SECRET_CRYPTPAD_SSO',
-        jwt_alg: 'RS256',
-        userinfo: false,
-        username_claim: 'sub'
-}
-    ]
-};
-```
+- nano /home/pad/cryptpad/config/sso.js and add the content [sso file](./conf/env/pad/sso.js)
+- now you can run `systemctl status cryptpad.service` to get the admin temp key used to create the first admin and initiliaze Cryptpad.
 ## Stalwart Web Server
 ### Installation
 Run the  at [Installlation Script](https://stalw.art/docs/install/platform/linux/) provided by Stalwart and config it as usually.
+- add the webserver conf file, add https and enable it
+    - [apache](./conf/apache/mail.conf)
+    - [nginx](./conf/nginx/mail.domain)
+
 Warning : We will soon enable the OIDC provider in stalwart. As a result, we won't be able to connect to admin account in admin webUI. So, you need to add the env variable STALWART_RECOVERY_ADMIN=admin:cool_password.
-
-now, apache conf file: 
-```
-<VirtualHost *:80>
-    ServerName mail.DOMAIN
-
-    # Configuration des en-têtes pour le reverse proxy
-    ProxyPreserveHost On
-    ProxyRequests Off
-
-    RequestHeader set X-Real-IP %{REMOTE_ADDR}s
-    RequestHeader set X-Forwarded-For %{REMOTE_ADDR}s
-    RequestHeader set X-Forwarded-Proto "http"
-
-    RewriteEngine On
-    RewriteCond %{HTTP:Upgrade} websocket [NC]
-    RewriteCond %{HTTP:Connection} upgrade [NC]
-    RewriteRule ^/?(.*) ws://127.0.0.1:8080/$1 [P,L]
-
-    ProxyPass / http://127.0.0.1:8080/
-    ProxyPassReverse / http://127.0.0.1:8080/
-
-    ErrorLog ${APACHE_LOG_DIR}/stalwart_error.log
-    CustomLog ${APACHE_LOG_DIR}/stalwart_access.log combined
-</VirtualHost>
-```
-- run certbot.
-
+- sudo nano /etc/stalwart/stalwart.env
+- Now, go to admin/Settings/x:Http/HttpSecurity/singleton and check permissve CORS to allow bulwark to connect.
 ## Bulwark Webmail
-
+Some servers have not enought CPU to build the app, so we let github build it and we download.  
 - sudo useradd -r -m -d /home/bulwark -s /bin/bash bulwark
-- sudo mkdir -p /home/bulwark/webmail/data/{settings,admin,admin-state}
-- wget https://github.com/bulwarkmail/webmail/releases/latest/download/bulwark-webmail.tar.gz -O /tmp/bulwark-webmail.tar.gz
-- sudo tar -xzf /tmp/bulwark-webmail.tar.gz -C /home/bulwark/webmail
-- rm -f /tmp/bulwark-webmail.tar.gz
-- cd /home/bulwark/webmail
-- sudo -u bulwark npm install --omit=dev --no-audit --ignore-scripts --no-fund
-- sudo chown -R bulwark:bulwark /home/bulwark/webmail
-- sudo find /home/bulwark/webmail -type d -exec chmod 755 {} \;
-- sudo find /home/bulwark/webmail -type f -exec chmod 644 {} \;
-- 
-```
-sudo chmod -R 755 /home/bulwark/webmail/node_modules/.bin
-sudo find /home/bulwark/webmail/node_modules/next/dist/bin -type f -exec chmod 755 {} \; 2>/dev/null || true
-```
-- sudo nano `/etc/systemd/system/bulwark-webmail.service` :
-
-```ini
-[Unit]
-Description=Bulwark Webmail Service
-After=network.target
-
-[Service]
-Type=simple
-User=bulwark
-Group=bulwark
-WorkingDirectory=/home/bulwark/webmail
-ExecStart=/usr/bin/npm start
-Restart=always
-RestartSec=10
-StandardOutput=syslog
-StandardError=syslog
-SyslogIdentifier=bulwark-webmail
-Environment=NODE_ENV=production
-
-[Install]
-WantedBy=multi-user.target
-
-```
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable --now bulwark-webmail
-
-```
-
-- sudo nano `/etc/apache2/sites-available/bulwark-webmail.conf` :
-
-```apache
-<VirtualHost *:80>
-    ServerName web.DOMAIN
-
-    ProxyRequests Off
-    ProxyPreserveHost On
-    ProxyVia Full
-
-    <Proxy *>
-        Require all granted
-    </Proxy>
-
-    ProxyPass "/bridge-minimal.html" !
-
-    # Routing WebSockets (Next.js)
-    RewriteEngine On
-    RewriteCond %{HTTP:Upgrade} =websocket [NC]
-    RewriteRule ^/(.*)           ws://127.0.0.1:3000/$1 [P,L]
-
-    ProxyPass / http://127.0.0.1:3000/
-    ProxyPassReverse / http://127.0.0.1:3000/
-
-    RequestHeader set X-Forwarded-Proto "http"
-    RequestHeader set X-Forwarded-Port "80"
-    Header always set X-Content-Type-Options "nosniff"
-    Header always set X-Frame-Options "SAMEORIGIN"
-
-    Alias "/bridge-minimal.html" "/home/aurion/aurionmail/bridges/bridge-minimal.html"
-
-    <Location "/bridge-minimal.html">
-        Header always set Content-Security-Policy "frame-ancestors https://sso.DOMAIN"
-        Require all granted
-    </Location>
-
-    ErrorLog ${APACHE_LOG_DIR}/bulwark-webmail-error.log
-    CustomLog ${APACHE_LOG_DIR}/bulwark-webmail-access.log combined
-</VirtualHost>
-
-```
-- activate https :
-```bash
-sudo a2ensite bulwark-webmail.conf
-sudo systemctl restart apache2
-sudo certbot --apache -d web.DOMAIN
-```
-
+- sudo -u bulwark bash
+- wget https://github.com/bulwarkmail/webmail/releases/download/1.7.8/bulwark-standalone-1.7.8-linux-amd64.tar.gz 
+- sudo chmod -R 755 /home/bulwark/webmail/node_modules/.bin
+- sudo find /home/bulwark/webmail/node_modules/next/dist/bin -type f -exec chmod 755 {} \; 2>/dev/null || true
+- sudo nano /etc/systemd/system/bulwark-webmail.service and add the content of the [service file](./conf/systemd/bulwark-webmail.service)
+- sudo systemctl daemon-reload
+- sudo systemctl enable --now bulwark-webmail
+- add the webserver conf file, add https and enable it
+    - [apache](./conf/apache/web.conf)
+    - [nginx](./conf/nginx/web.domain)
 ## Aurion API
 - cd /home/aurion/aurionmail/api
-- sudo nano .env
+- sudo nano .env and the content of [.env file](./conf/env/api/.env)
+
 - sudo -u postgres psql
-- CREATE USER aurionUSER WITH PASSWORD 'pass';
-- CREATE DATABASE aurionDB OWNER aurionUSER;
-- \c aurionDB
-- GRANT ALL ON SCHEMA public TO aurionUSER;
-- ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO aurionUSER;
-- ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO aurionUSER;
+- CREATE USER aurionuser WITH PASSWORD 'pass';
+- CREATE DATABASE auriondb OWNER aurionuser;
+- \c auriondb
+- GRANT ALL ON SCHEMA public TO aurionuser;
+- ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO aurionuser;
+- ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO aurionuser;
 - exit
 - sudo wget https://raw.githubusercontent.com/AurionMail/core-api/refs/heads/main/migrations/init.sql
-- psql -h localhost -U aurionUSER -d aurionDB -f migrations/init.sql
+- psql -h localhost -U aurionuser -d auriondb -f init.sql
 - sudo chmod -R 750 ./aurion-core
-- sudo chmod +x ./aurion-api
-- Create the file /etc/systemd/system/aurion.service:
-```
-[Unit]
-Description=Aurion Core Server
-After=network.target postgresql.service
-
-[Service]
-Type=simple
-User=aurion
-WorkingDirectory=/home/aurion/aurionmail/api
-ExecStart=/home/aurion/aurionmail/api/aurion-api
-Restart=always
-RestartSec=5
-EnvironmentFile=/home/aurion/aurionmail/api/.env
-
-[Install]
-WantedBy=multi-user.target
-
-Enable and start the service:
-
-sudo systemctl daemon-reload
-sudo systemctl enable aurion
-sudo systemctl start aurion
-```
-- Add apache conf
-```
-<VirtualHost *:80>
-    ServerName api.DOMAIN
-
-    ProxyPreserveHost On
-    ProxyPass / http://localhost:8070/
-    ProxyPassReverse / http://localhost:8070/
-
-    Header always set X-Content-Type-Options "nosniff"
-    Header always set X-Frame-Options "DENY"
-    Header always set X-XSS-Protection "1; mode=block"
-
-    ErrorLog ${APACHE_LOG_DIR}/aurion-error.log
-    CustomLog ${APACHE_LOG_DIR}/aurion-access.log combined
-</VirtualHost>
-```
-- then enable cerbot
+- sudo chmod +x /home/aurion/aurionmail/api/aurion-api
+- sudo nano /etc/systemd/system/aurion.service and add the content of [service file](./conf/systemd/aurion.service)
+- sudo systemctl daemon-reload
+- sudo systemctl enable aurion
+- sudo systemctl start aurion
+- add the webserver conf file, add https and enable it
+    - [apache](./conf/apache/api.conf)
+    - [nginx](./conf/nginx/api.domain)
+## Bridges
+- cd /home/aurion/aurionmail/bridges
+- find . -type f -name "*.html" -exec sed -i 's/DOMAIN/yourTruedomain.com/g' {} +
+- chmod 755 /home/aurion to allow nginx to traverse
 # Configure Auth
-
-### Config for clients
-#### Bulwark + Stalwart
+All we need is now installed. We must now configure the SSO.
+## Config Hydra
+cd /home/aurion/aurionmail/hydra/bin
+### Bulwark + Stalwart
 ```bash
-  sudo ./hydra create client \  
-  --endpoint http://127.0.0.1:4445 \  --id stalwart \
-  --name "AurionMail Webmail"  \
+  sudo ./hydra create oauth2-client \
+  --endpoint http://127.0.0.1:4445 \
+  --id stalwart \
+  --name "AurionMail Webmail" \
   --secret "SECRET_BULWARK_SSO" \
-  --access-token-strategy jwt  \
-  --audience "stalwart" \ 
-  --grant-type authorization_code,refresh_token  \
-  --response-type code  \
-  --scope openid,profile,email,offline_access  \
-  --redirect-uri "https://web.DOMAIN/auth/callback,https://web.DOMAIN/en/auth/callback,https://web.DOMAIN/fr/auth/callback" \
+  --access-token-strategy jwt \
+  --audience "stalwart" \
+  --grant-type authorization_code,refresh_token \
+  --response-type code \
+  --scope openid,profile,email,offline_access \
+  --redirect-uri "https://web.aurionmail.org/auth/callback,https://web.aurionmail.org/en/auth/callback,https://web.aurionmail.org/fr/auth/callback" \
   --token-endpoint-auth-method client_secret_post \
   --skip-consent
 ```
-
 ### Cryptpad
 ```bash
-sudo ./hydra create client \
+sudo ./hydra create oauth2-client \
   --endpoint http://127.0.0.1:4445 \
   --id cryptpad \
   --name "CryptPad" \
@@ -619,7 +218,8 @@ sudo ./hydra create client \
   --token-endpoint-auth-method client_secret_basic \
   --skip-consent
 ```
- ### Conf Bulwark
+## Config clients
+### Bulwark
 Go to admin ui : https://web.DOMAIN/admin then Authentication :
 - Oauth : Activated
 - OAuth Only : Activated
@@ -627,9 +227,7 @@ Go to admin ui : https://web.DOMAIN/admin then Authentication :
 - OAuth Client Secret : SECRET_BULWARK_SSO 
 - OAuth Issuer URL : https://oauth.DOMAIN
 - Auto SSO : Activated
-
-### Conf Stalwart
-
+### Stalwart
 Navigate to webUI with your admin account, then : Authentication->Directories 
 - Issuer URL : https://oauth.DOMAIN
 - Required Audience : null
@@ -637,3 +235,7 @@ Navigate to webUI with your admin account, then : Authentication->Directories
 - Username Claim : email
 - Name Claim : name 
 - Groups Claim : groups
+- don't forget to add your domain to username domain. if not, it won't work at all and it is almost impossible to find why ! 
+Now go to Authentication->General : select your directory as directoty
+### Crytpad
+Nothing to do, it has been configured with "nano /home/pad/cryptpad/config/sso.js and add the content [sso file](./conf/env/pad/sso.js)" Remeber ?

@@ -1,0 +1,2 @@
+- ldap : run certbot to redirect automaticallt
+- hydra : run certbot to redirect autmaticaaly

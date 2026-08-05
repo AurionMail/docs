@@ -1,0 +1,15 @@
+[Unit]
+Description=Aurion Core Server
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=aurion
+WorkingDirectory=/home/aurion/aurionmail/api
+ExecStart=/home/aurion/aurionmail/api/aurion-api
+Restart=always
+RestartSec=5
+EnvironmentFile=/home/aurion/aurionmail/api/.env
+
+[Install]
+WantedBy=multi-user.target

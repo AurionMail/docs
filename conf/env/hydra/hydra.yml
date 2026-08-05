@@ -1,0 +1,27 @@
+serve:
+  cookies:
+    same_site_mode: Lax
+dsn: postgres://hydra:HYDRA_PASSWORD@127.0.0.1:5432/hydra?sslmode=disable&max_conns=20&max_idle_conns=4
+urls:
+  self:
+    issuer: https://oauth.DOMAIN
+  consent: https://sso.DOMAIN/consent
+  login: https://sso.DOMAIN/login
+  logout: https://sso.DOMAIN/logout
+  post_logout_redirect: https://sso.DOMAIN/exited
+
+  device:
+    verification: https://sso.DOMAIN/device/verify
+    success: https://sso.DOMAIN/device/success
+
+secrets:
+  system:
+    - GENERATE_A_COOL_SECRET
+
+oidc:
+  subject_identifiers:
+    supported_types:
+      - pairwise
+      - public
+    pairwise:
+      salt: GENERATE_A_COOL_SECRET
