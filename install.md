@@ -192,7 +192,7 @@ Some servers have not enought CPU to build the app, so we let github build it an
 - ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO aurionuser;
 - ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO aurionuser;
 - exit
-- sudo wget https://raw.githubusercontent.com/AurionMail/core-api/refs/heads/main/migrations/init.sql
+- cd /home/aurion/aurionmail/api/migrations
 - psql -h localhost -U aurionuser -d auriondb -f init.sql
 - sudo chmod -R 750 ./aurion-core
 - sudo chmod +x /home/aurion/aurionmail/api/aurion-api
