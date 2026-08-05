@@ -115,7 +115,9 @@ We use this app to check credential against LDAP and let the user consent to giv
 - sudo -u pad bash
 - wget https://github.com/AurionMail/docs/releases/download/0.0.2/cryptpad.zip 
 - unzip cryptpad.zip 
-- cd cryptpad/config
+- cd cryptpad
+- find customize lib www -type f -exec sed -i 's/AURION_DOMAIN_REPLACE_ME/DOMAIN_REPLACE_ME/g' {} +
+- cd config
 - cp config.example.js config.js
 - cp sso.example.js sso.js
 - follow instrcutons at https://docs.cryptpad.org/en/admin_guide/installation.html from "configuration" or "onlyoffice" if you want. In facts, you can just add teh crontab, the rest is alerady done or will be done in this guide.
