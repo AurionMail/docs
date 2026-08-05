@@ -242,6 +242,7 @@ sudo ./hydra create oauth2-client \
 ```
 ## Config clients
 ### Bulwark
+#### Settings
 Go to admin ui : https://web.DOMAIN_REPLACE_ME/admin then Authentication :
 - Oauth : Activated
 - OAuth Only : Activated
@@ -249,6 +250,8 @@ Go to admin ui : https://web.DOMAIN_REPLACE_ME/admin then Authentication :
 - OAuth Client Secret : SECRET_BULWARK_SSO 
 - OAuth Issuer URL : https://oauth.DOMAIN_REPLACE_ME
 - Auto SSO : Activated
+#### Aurion PGP Plugin
+TODO
 ### Stalwart
 Navigate to webUI with your admin account, then : Authentication->Directories 
 - Issuer URL : https://oauth.DOMAIN_REPLACE_ME
