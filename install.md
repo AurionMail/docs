@@ -1,6 +1,6 @@
 # Aurion Installation Tutorial
-This tutoriel covers the parts in which AurionMail is involved. This tutorial covers installation with Stalwart, Bulwark, lldap, ory hydra, cryptpad and all you need.
-## Prerequies
+This tutorial covers the parts in which AurionMail is involved. This tutorial covers installation with Stalwart, Bulwark, lldap, Ory Hydra, LLDAP, CryptPad and all you need.
+## Prerequisites
 You need a domain name. It is referenced as `DOMAIN_REPLACE_ME` during this tuto. You will need to replace in commands and conf files.
 We assume this from this domain will send emails Add these subdomains to its DNS Zone :
 - mail. : used by Stalwart
@@ -34,7 +34,7 @@ For testing with up to 30 users, 2GB cheap VPS is enough. In this tutorial, we w
 | **Stalwart** | Mail Server | `127.0.0.1:8080` | `mail.` | `stalwart` | `MANUAL` | /opt/stalwart |
 | **Bridges** | Bridges | *Integrated with reverse proxy* | - | `aurion` | `MANUAL` |/home/aurion/aurionmail/bridges  |
 ## Users
-We need to create 2 users : `aurion`, `bulwark` and `pad`. `aurion` will handle the auth of the users, keys and core API. 
+We need to create 3 users : `aurion`, `bulwark` and `pad`. `aurion` will handle the auth of the users, keys and core API. 
 - useradd -s /bin/false -m aurion
 - useradd -s /bin/false -m bulwark
 - useradd -s /bin/false -m pad
@@ -62,14 +62,13 @@ You will need to generate some secrets during the installation process. You can 
 echo 'deb http://download.opensuse.org/repositories/home:/Masgalor:/LLDAP/Debian_13/ /' | sudo tee /etc/apt/sources.list.d/home:Masgalor:LLDAP.list
 curl -fsSL https://download.opensuse.org/repositories/home:Masgalor:LLDAP/Debian_13/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_Masgalor_LLDAP.gpg > /dev/null
 sudo apt update
-sudo apt install lldap
 ```
-- `sudo apt install lldap lldap-extras`
+- sudo apt install lldap lldap-extras
 - edit conf file at `/etc/lldap/lldap_config.toml`
     - ldap_host = "127.0.0.1"
     - http_host = "127.0.0.1"
     - jwt_secret = "LDAP_JWT"
-    - ldap_base_dn = "dc=DOMAINSTART,dc=DOMAINEND" :  for refernece, with aurionmail.org, we would use dc=aurionmail,dc=org
+    - ldap_base_dn = "dc=DOMAINSTART,dc=DOMAINEND" :  for reference, with aurionmail.org, we would use dc=aurionmail,dc=org
 The default admin user is admin / password . Once connected throught the webUI, delete it and add a new admin user.
 - add the webserver conf file, add https and enable it
     - [apache](./conf/apache/ldap.conf)
@@ -84,7 +83,7 @@ You have now installed the API, Hydra, the SSO app and the bridges. Now, let's c
 - sudo -i -u postgres
 - createdb hydra
 - psql
-- ALTER SYSTEM SET password_encryption = DOMAIN'scram-sha-256';
+- ALTER SYSTEM SET password_encryption = 'scram-sha-256';
 - SELECT pg_reload_conf();
 - CREATE USER hydra PASSWORD 'HYDRA_PASSWORD';
 - exit;
@@ -116,7 +115,7 @@ You have now installed the API, Hydra, the SSO app and the bridges. Now, let's c
 
 At this point, Hydra and LDAP are installed but they don't speak to them. It is normal, and they never do this. We need to install the SSO App
 ## SSO App
-Ory Hydra only manage the OAuth and OIDC process. He doesn't have a fronted to let the user use its credentiald. It is for the reason we choose it by the way :)
+Ory Hydra only manage the OAuth and OIDC process. It doesn't have a frontend to let users use their credentials. It is for the reason we choose it by the way :)
 
 We use this app to check credential against LDAP and let the user consent to give acces to the clients app its info
 ### Installation
@@ -140,7 +139,7 @@ We use this app to check credential against LDAP and let the user consent to giv
 - cd config
 - cp config.example.js config.js
 - cp sso.example.js sso.js
-- follow instrcutons at https://docs.cryptpad.org/en/admin_guide/installation.html from "configuration" or "onlyoffice" if you want. In facts, you can just add teh crontab, the rest is alerady done or will be done in this guide.
+- follow instrcutons at https://docs.cryptpad.org/en/admin_guide/installation.html from "configuration" or "onlyoffice" if you want. In fact, you can just add the crontab, the rest is already done or will be done in this guide.
 - nano config.js and edit this values :
     - httpUnsafeOrigin: 'https://pad.DOMAIN_REPLACE_ME',
     - httpSafeOrigin: "https://sand.DOMAIN_REPLACE_ME",
@@ -149,7 +148,7 @@ We use this app to check credential against LDAP and let the user consent to giv
     - httpSafePort: 3011,
     - websocketPort: 3013,
     - installMethod: 'aurion',
-- nano /etc/systemd/system/cryptpad.service and paste the content of [hydra.service](./conf/systemd/cryptpad.service)
+- nano /etc/systemd/system/cryptpad.service and paste the content of [cryptpad.service](./conf/systemd/cryptpad.service)
 - add the webserver conf file, add https and enable it
     - [apache](./conf/apache/pad.conf)
     - [nginx](./conf/nginx/pad.domain)
@@ -158,7 +157,7 @@ We use this app to check credential against LDAP and let the user consent to giv
 - now you can run `systemctl status cryptpad.service` to get the admin temp key used to create the first admin and initiliaze Cryptpad.
 ## Stalwart Web Server
 ### Installation
-Run the [Installlation Script](https://stalw.art/docs/install/platform/linux/) provided by Stalwart and config it as usually.
+Run the [Installation Script](https://stalw.art/docs/install/platform/linux/) provided by Stalwart and config it as usually.
 - add the webserver conf file, add https and enable it
     - [apache](./conf/apache/mail.conf)
     - [nginx](./conf/nginx/mail.domain)
@@ -167,8 +166,7 @@ Warning : We will soon enable the OIDC provider in stalwart. As a result, we won
 - sudo nano /etc/stalwart/stalwart.env
 - Now, go to admin/Settings/x:Http/HttpSecurity/singleton and check permissve CORS to allow bulwark to connect.
 ## Bulwark Webmail
-Some servers have not enought CPU to build the app, so we let github build it and we download.  
-- sudo useradd -r -m -d /home/bulwark -s /bin/bash bulwark
+Some servers do not have enough CPU to build the app, so we let github build it and we download.  
 - sudo -u bulwark bash
 - wget https://github.com/bulwarkmail/webmail/releases/download/1.7.8/bulwark-standalone-1.7.8-linux-amd64.tar.gz 
 - sudo chmod -R 755 /home/bulwark/webmail/node_modules/.bin
@@ -185,7 +183,7 @@ Some servers have not enought CPU to build the app, so we let github build it an
 - sudo nano .env and the content of [.env file](./conf/env/api/.env)
 
 - sudo -u postgres psql
-- CREATE USER aurionuser WITH PASSWORD 'pass';
+- CREATE USER aurionuser WITH PASSWORD AURION_DB_PASSWORD;
 - CREATE DATABASE auriondb OWNER aurionuser;
 - \c auriondb
 - GRANT ALL ON SCHEMA public TO aurionuser;
@@ -259,7 +257,7 @@ Navigate to webUI with your admin account, then : Authentication->Directories
 - Username Claim : email
 - Name Claim : name 
 - Groups Claim : groups
-- don't forget to add your domain to username domain. if not, it won't work at all and it is almost impossible to find why ! 
-Now go to Authentication->General : select your directory as directoty
+- don't forget to add your domain to username domain.
+Navigate to Authentication -> General: Select your created directory as the primary authentication directory
 ### Crytpad
-Nothing to do, it has been configured with "nano /home/pad/cryptpad/config/sso.js and add the content [sso file](./conf/env/pad/sso.js)" Remeber ?
+Nothing to do, it has been configured with "nano /home/pad/cryptpad/config/sso.js and add the content [sso file](./conf/env/pad/sso.js)" Remember ?
