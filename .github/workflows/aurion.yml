@@ -35,15 +35,17 @@ jobs:
           tar -xzf hydra.tar.gz -C aurionmail/hydra/bin
           rm hydra.tar.gz
 
-      - name: Download API binary
+      - name: Download and extract API zip
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           API_TAG=$(gh release view --repo AurionMail/core-api --json tagName -q .tagName)
           
           echo "Downloading Core API version: $API_TAG"
-          curl -L "https://github.com/AurionMail/core-api/releases/download/${API_TAG}/aurion-api" -o aurionmail/api/aurion-api
+          curl -L "https://github.com/AurionMail/core-api/releases/download/${API_TAG}/aurion-api.zip" -o api.zip
+          unzip -q api.zip -d aurionmail/api
           chmod +x aurionmail/api/aurion-api
+          rm api.zip
 
       - name: Download and extract SSO
         env:
