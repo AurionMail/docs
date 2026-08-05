@@ -1,6 +1,6 @@
 server {
     listen 80;
-    server_name sso.aurionmail.org;
+    server_name sso.DOMAIN_REPLACE_ME;
 
     location / {
         proxy_pass http://127.0.0.1:3030;

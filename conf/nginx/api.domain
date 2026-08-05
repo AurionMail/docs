@@ -1,6 +1,6 @@
 server {
     listen 80;
-    server_name api.aurionmail.org;
+    server_name api.DOMAIN_REPLACE_ME;
 
     # En-têtes de sécurité
     add_header X-Content-Type-Options "nosniff" always;

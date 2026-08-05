@@ -1,13 +1,13 @@
 server {
     listen 80;
-    server_name web.aurionmail.org;
+    server_name web.DOMAIN_REPLACE_ME;
 
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-Frame-Options "SAMEORIGIN" always;
 
     location = /bridge-minimal.html {
         alias /home/aurion/aurionmail/bridges/webmail_bridge.html;
-        add_header Content-Security-Policy "frame-ancestors https://sso.aurionmail.org" always;
+        add_header Content-Security-Policy "frame-ancestors https://sso.DOMAIN_REPLACE_ME" always;
     }
 
     location / {

@@ -1,13 +1,13 @@
 map $uri $bridge_csp {
-    "/bridge-minimal.html" "frame-ancestors https://web.aurionmail.org https://sso.aurionmail.org";
-    "/bridge-sand.html"    "frame-ancestors https://pad.aurionmail.org https://web.aurionmail.org https://sso.aurionmail.org";
+    "/bridge-minimal.html" "frame-ancestors https://web.DOMAIN_REPLACE_ME https://sso.DOMAIN_REPLACE_ME";
+    "/bridge-sand.html"    "frame-ancestors https://pad.DOMAIN_REPLACE_ME https://web.DOMAIN_REPLACE_ME https://sso.DOMAIN_REPLACE_ME";
     default                "";
 }
 
 server {
     listen 80;
     listen [::]:80;
-    server_name pad.aurionmail.org sand.aurionmail.org;
+    server_name pad.DOMAIN_REPLACE_ME sand.DOMAIN_REPLACE_ME;
 
     location / {
         return 301 https://$host$request_uri;
@@ -19,11 +19,11 @@ server {
     listen [::]:443 ssl;
     http2 on;
 
-    server_name pad.aurionmail.org sand.aurionmail.org;
+    server_name pad.DOMAIN_REPLACE_ME sand.DOMAIN_REPLACE_ME;
 
     # Certificats Let's Encrypt
-    ssl_certificate /etc/letsencrypt/live/pad.aurionmail.org/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/pad.aurionmail.org/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/pad.DOMAIN_REPLACE_ME/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/pad.DOMAIN_REPLACE_ME/privkey.pem;
 
     ssl_dhparam /etc/nginx/dhparam.pem; # Si le fichier n'existe pas : openssl dhparam -out /etc/nginx/dhparam.pem 2048
 
@@ -48,7 +48,7 @@ server {
     # =============================================================
     location = /login {
         if ($arg_from != "aurion") {
-            return 302 https://web.aurionmail.org;
+            return 302 https://web.DOMAIN_REPLACE_ME;
         }
 
         proxy_pass http://127.0.0.1:3010;

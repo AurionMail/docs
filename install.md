@@ -1,7 +1,8 @@
 # Aurion Installation Tutorial
 This tutoriel covers the parts in which AurionMail is involved. This tutorial covers installation with Stalwart, Bulwark, lldap, ory hydra, cryptpad and all you need.
 ## Prerequies
-You need a domain name. We assume this from this domain will send emails Add these subdomains to its DNS Zone :
+You need a domain name. It is referenced as `DOMAIN_REPLACE_ME` during this tuto. You will need to replace in commands and conf files.
+We assume this from this domain will send emails Add these subdomains to its DNS Zone :
 - mail. : used by Stalwart
 - web. : used by the webmail Bulwark
 - oauth. used by Hydra Backend
@@ -46,7 +47,7 @@ sudo apt install lldap
     - ldap_host = "127.0.0.1"
     - http_host = "127.0.0.1"
     - jwt_secret = "GENERATE"
-    - ldap_base_dn = "dc=DOMAIN,dc=DOMAINEND" :  for refernece, with aurionmail.org, we would use dc=aurionmail,dc=org
+    - ldap_base_dn = "dc=DOMAINSTART,dc=DOMAINEND" :  for refernece, with aurionmail.org, we would use dc=aurionmail,dc=org
 The default admin user is admin / password . Once connected throught the webUI, delete it and add a new admin user.
 - add the webserver conf file, add https and enable it
     - [apache](./conf/apache/ldap.conf)
@@ -62,7 +63,7 @@ You have now installed the API, Hydra, the SSO app and the bridges. Now, let's c
 - sudo -i -u postgres
 - createdb hydra
 - psql
-- ALTER SYSTEM SET password_encryption = 'scram-sha-256';
+- ALTER SYSTEM SET password_encryption = DOMAIN'scram-sha-256';
 - SELECT pg_reload_conf();
 - CREATE USER hydra PASSWORD 'HYDRA_PASSWORD';
 - exit;
@@ -119,8 +120,8 @@ We use this app to check credential against LDAP and let the user consent to giv
 - cp sso.example.js sso.js
 - follow instrcutons at https://docs.cryptpad.org/en/admin_guide/installation.html from "configuration" or "onlyoffice" if you want. In facts, you can just add teh crontab, the rest is alerady done or will be done in this guide.
 - nano config.js and edit this values :
-    - httpUnsafeOrigin: 'https://pad.DOMAIN',
-    - httpSafeOrigin: "https://sand.DOMAIN",
+    - httpUnsafeOrigin: 'https://pad.DOMAIN_REPLACE_ME',
+    - httpSafeOrigin: "https://sand.DOMAIN_REPLACE_ME",
     - httpAddress: '127.0.0.1',
     - httpPort: 3010,
     - httpSafePort: 3011,
@@ -181,7 +182,7 @@ Some servers have not enought CPU to build the app, so we let github build it an
     - [nginx](./conf/nginx/api.domain)
 ## Bridges
 - cd /home/aurion/aurionmail/bridges
-- find . -type f -name "*.html" -exec sed -i 's/DOMAIN/yourTruedomain.com/g' {} +
+- find . -type f -name "*.html" -exec sed -i 's/DOMAIN_TO_REPLACE/DOMAIN_REPLACE_ME/g' {} +
 - chmod 755 /home/aurion to allow nginx to traverse
 # Configure Auth
 All we need is now installed. We must now configure the SSO.
@@ -199,7 +200,7 @@ cd /home/aurion/aurionmail/hydra/bin
   --grant-type authorization_code,refresh_token \
   --response-type code \
   --scope openid,profile,email,offline_access \
-  --redirect-uri "https://web.aurionmail.org/auth/callback,https://web.aurionmail.org/en/auth/callback,https://web.aurionmail.org/fr/auth/callback" \
+  --redirect-uri "https://web.DOMAIN_REPLACE_ME/auth/callback,https://web.DOMAIN_REPLACE_ME/en/auth/callback,https://web.DOMAIN_REPLACE_ME/fr/auth/callback" \
   --token-endpoint-auth-method client_secret_post \
   --skip-consent
 ```
@@ -214,22 +215,22 @@ sudo ./hydra create oauth2-client \
   --grant-type authorization_code,refresh_token \
   --response-type code \
   --scope openid,profile,email,offline_access \
-  --redirect-uri "https://pad.DOMAIN/ssoauth" \
+  --redirect-uri "https://pad.DOMAIN_REPLACE_ME/ssoauth" \
   --token-endpoint-auth-method client_secret_basic \
   --skip-consent
 ```
 ## Config clients
 ### Bulwark
-Go to admin ui : https://web.DOMAIN/admin then Authentication :
+Go to admin ui : https://web.DOMAIN_REPLACE_ME/admin then Authentication :
 - Oauth : Activated
 - OAuth Only : Activated
 - OAuthClientID: stalwart 
 - OAuth Client Secret : SECRET_BULWARK_SSO 
-- OAuth Issuer URL : https://oauth.DOMAIN
+- OAuth Issuer URL : https://oauth.DOMAIN_REPLACE_ME
 - Auto SSO : Activated
 ### Stalwart
 Navigate to webUI with your admin account, then : Authentication->Directories 
-- Issuer URL : https://oauth.DOMAIN
+- Issuer URL : https://oauth.DOMAIN_REPLACE_ME
 - Required Audience : null
 - Required Scopes : null
 - Username Claim : email

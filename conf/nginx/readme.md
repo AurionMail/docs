@@ -10,6 +10,6 @@ to active https. As a reminder, https is mandatory by Aurion, without it, it won
 ## Cryptpad
 To activate https for Cryptpad (pad.), don't folllow the precendet instructions. Cryptpad need a certificat that cover its two domains at same time.
 - Comment 443 of the config file. Without commenting, nginx will produce error when requesting certificates.
-- sudo certbot --nginx -d pad.aurionmail.org -d sand.aurionmail.org
+- sudo certbot --nginx -d pad.DOMAIN_REPLACE_ME -d sand.DOMAIN_REPLACE_ME
 - sudo openssl dhparam -out /etc/nginx/dhparam.pem 4096 (can take some times... (5min on my test server))
 - Then uncomment part 443
