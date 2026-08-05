@@ -159,6 +159,7 @@ Some servers have not enought CPU to build the app, so we let github build it an
 - add the webserver conf file, add https and enable it
     - [apache](./conf/apache/web.conf)
     - [nginx](./conf/nginx/web.domain)
+- now you can run `systemctl status bulwark-webmail.service` to get the admin temp key used to create the first admin and initiliaze the webmail.
 ## Aurion API
 - cd /home/aurion/aurionmail/api
 - sudo nano .env and the content of [.env file](./conf/env/api/.env)
