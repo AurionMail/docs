@@ -1,8 +1,8 @@
 # Aurion Installation Tutorial
-This tutorial covers the parts in which AurionMail is involved. This tutorial covers installation with Stalwart, Bulwark, lldap, Ory Hydra, LLDAP, CryptPad and all you need.
+This tutorial covers the parts in which AurionMail is involved. This tutorial covers installation with Stalwart, Bulwark, Ory Hydra, LLDAP, CryptPad and all you need.
 ## Prerequisites
 You need a domain name. It is referenced as `DOMAIN_REPLACE_ME` during this tuto. You will need to replace in commands and conf files.
-We assume this from this domain will send emails Add these subdomains to its DNS Zone :
+We assume this domain will send emails. Add these subdomains to its DNS Zone :
 - mail. : used by Stalwart
 - web. : used by the webmail Bulwark
 - oauth. used by Hydra Backend
@@ -139,7 +139,7 @@ We use this app to check credential against LDAP and let the user consent to giv
 - cd config
 - cp config.example.js config.js
 - cp sso.example.js sso.js
-- follow instrcutons at https://docs.cryptpad.org/en/admin_guide/installation.html from "configuration" or "onlyoffice" if you want. In fact, you can just add the crontab, the rest is already done or will be done in this guide.
+- follow instructions at https://docs.cryptpad.org/en/admin_guide/installation.html from "configuration" or "onlyoffice" if you want. In fact, you can just add the crontab, the rest is already done or will be done in this guide.
 - nano config.js and edit this values :
     - httpUnsafeOrigin: 'https://pad.DOMAIN_REPLACE_ME',
     - httpSafeOrigin: "https://sand.DOMAIN_REPLACE_ME",
@@ -153,11 +153,11 @@ We use this app to check credential against LDAP and let the user consent to giv
     - [apache](./conf/apache/pad.conf)
     - [nginx](./conf/nginx/pad.domain)
 
-- nano /home/pad/cryptpad/config/sso.js and add the content [sso file](./conf/env/pad/sso.js)
+- nano /home/pad/cryptpad/config/sso.js and add the content of [sso file](./conf/env/pad/sso.js)
 - now you can run `systemctl status cryptpad.service` to get the admin temp key used to create the first admin and initiliaze Cryptpad.
 ## Stalwart Web Server
 ### Installation
-Run the [Installation Script](https://stalw.art/docs/install/platform/linux/) provided by Stalwart and config it as usually.
+Run the [Installation Script](https://stalw.art/docs/install/platform/linux/) provided by Stalwart and follow the standard configuration.
 - add the webserver conf file, add https and enable it
     - [apache](./conf/apache/mail.conf)
     - [nginx](./conf/nginx/mail.domain)
@@ -170,7 +170,7 @@ Some servers do not have enough CPU to build the app, so we let github build it 
 - sudo -u bulwark bash
 - wget https://github.com/bulwarkmail/webmail/releases/download/1.7.8/bulwark-standalone-1.7.8-linux-amd64.tar.gz 
 - tar -xvf bulwark-standalone-1.7.8-linux-amd64.tar.gz
-- sudo chmod -R 755 /home/bulwark/webmail/node_modules/.bin
+<!--- sudo chmod -R 755 /home/bulwark/webmail/node_modules/.bin-->
 - sudo find /home/bulwark/webmail/node_modules/next/dist/bin -type f -exec chmod 755 {} \; 2>/dev/null || true
 - sudo nano /etc/systemd/system/bulwark-webmail.service and add the content of the [service file](./conf/systemd/bulwark-webmail.service)
 - sudo systemctl daemon-reload
@@ -205,7 +205,9 @@ Some servers do not have enough CPU to build the app, so we let github build it 
 ## Bridges
 - cd /home/aurion/aurionmail/bridges
 - find . -type f -name "*.html" -exec sed -i 's/DOMAIN_TO_REPLACE/DOMAIN_REPLACE_ME/g' {} +
-- chmod 755 /home/aurion to allow nginx to traverse
+- chmod 711 /home/aurion
+- chmod 711 /home/aurion/aurionmail
+- chmod -R 755 /home/aurion/aurionmail/bridges
 # Configure Auth
 All we need is now installed. We must now configure the SSO.
 ## Config Hydra
