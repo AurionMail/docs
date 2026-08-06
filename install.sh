@@ -11,7 +11,7 @@ fi
 
 # Install minimal dependencies for the interactive setup wizard
 apt-get update -qq
-apt-get install -y -qq whiptail curl openssl unzip gpg > /dev/null
+apt-get install -y -qq whiptail curl openssl unzip gpg certbot python3-certbot-nginx python3-certbot-apache > /dev/null
 
 # Ensure script is executed from project root
 if [ ! -d "./conf" ]; then
@@ -129,8 +129,14 @@ if [ "$INSTALL_LLDAP" = true ]; then
     # Install Web Server Config
     if [ "$WEBSERVER" = "NGINX" ]; then
         cp ./conf/nginx/ldap.domain /etc/nginx/sites-available/ldap.$DOMAIN
+        ln -sf /etc/nginx/sites-available/ldap.$DOMAIN /etc/nginx/sites-enabled/
+        nginx -t && systemctl reload nginx
+        certbot --nginx -d ldap.$DOMAIN
     else
         cp ./conf/apache/ldap.conf /etc/apache2/sites-available/ldap.conf
+        a2ensite ldap.conf
+        systemctl reload apache2
+        certbot --apache -d ldap.$DOMAIN
     fi
 fi
 
@@ -191,10 +197,22 @@ if [ "$INSTALL_CORE" = true ]; then
         cp ./conf/nginx/oauth.domain /etc/nginx/sites-available/oauth.$DOMAIN
         cp ./conf/nginx/sso.domain /etc/nginx/sites-available/sso.$DOMAIN
         cp ./conf/nginx/api.domain /etc/nginx/sites-available/api.$DOMAIN
+        ln -sf /etc/nginx/sites-available/oauth.$DOMAIN /etc/nginx/sites-enabled/
+        ln -sf /etc/nginx/sites-available/sso.$DOMAIN /etc/nginx/sites-enabled/
+        ln -sf /etc/nginx/sites-available/api.$DOMAIN /etc/nginx/sites-enabled/
+        nginx -t && systemctl reload nginx
+        certbot --nginx -d oauth.$DOMAIN
+        certbot --nginx -d sso.$DOMAIN
+        certbot --nginx -d api.$DOMAIN
     else
         cp ./conf/apache/oauth.conf /etc/apache2/sites-available/oauth.conf
         cp ./conf/apache/sso.conf /etc/apache2/sites-available/sso.conf
         cp ./conf/apache/api.conf /etc/apache2/sites-available/api.conf
+        a2ensite oauth.conf sso.conf api.conf
+        systemctl reload apache2
+        certbot --apache -d oauth.$DOMAIN
+        certbot --apache -d sso.$DOMAIN
+        certbot --apache -d api.$DOMAIN
     fi
 fi
 
@@ -219,9 +237,28 @@ if [ "$INSTALL_CRYPTPAD" = true ]; then
     systemctl enable --now cryptpad
 
     if [ "$WEBSERVER" = "NGINX" ]; then
+        # 1. Temporarily copy the HTTP-only config to allow certbot validation
+        cp ./conf/nginx/pad_http_only.domain /etc/nginx/sites-available/pad.$DOMAIN
+        ln -sf /etc/nginx/sites-available/pad.$DOMAIN /etc/nginx/sites-enabled/
+        nginx -t && systemctl reload nginx
+
+        # 2. Generate DH parameters if needed
+        if [ ! -f /etc/nginx/dhparam.pem ]; then
+            echo "🔐 Generating DH parameters for CryptPad (this may take a few minutes)..."
+            openssl dhparam -out /etc/nginx/dhparam.pem 4096
+        fi
+
+        # 3. Request certificates for both domains
+        certbot --nginx -d pad.$DOMAIN -d sand.$DOMAIN
+
+        # 4. Deploy the full production config (with SSL/HTTP2 directives) now that certs exist
         cp ./conf/nginx/pad.domain /etc/nginx/sites-available/pad.$DOMAIN
+        nginx -t && systemctl reload nginx
     else
         cp ./conf/apache/pad.conf /etc/apache2/sites-available/pad.conf
+        a2ensite pad.conf
+        systemctl reload apache2
+        certbot --apache -d pad.$DOMAIN -d sand.$DOMAIN
     fi
 fi
 
@@ -252,8 +289,14 @@ if [ "$INSTALL_BULWARK" = true ]; then
 
     if [ "$WEBSERVER" = "NGINX" ]; then
         cp ./conf/nginx/web.domain /etc/nginx/sites-available/web.$DOMAIN
+        ln -sf /etc/nginx/sites-available/web.$DOMAIN /etc/nginx/sites-enabled/
+        nginx -t && systemctl reload nginx
+        certbot --nginx -d web.$DOMAIN
     else
         cp ./conf/apache/web.conf /etc/apache2/sites-available/web.conf
+        a2ensite web.conf
+        systemctl reload apache2
+        certbot --apache -d web.$DOMAIN
     fi
 fi
 
@@ -267,8 +310,14 @@ if [ "$INSTALL_STALWART" = true ]; then
 
     if [ "$WEBSERVER" = "NGINX" ]; then
         cp ./conf/nginx/mail.domain /etc/nginx/sites-available/mail.$DOMAIN
+        ln -sf /etc/nginx/sites-available/mail.$DOMAIN /etc/nginx/sites-enabled/
+        nginx -t && systemctl reload nginx
+        certbot --nginx -d mail.$DOMAIN
     else
         cp ./conf/apache/mail.conf /etc/apache2/sites-available/mail.conf
+        a2ensite mail.conf
+        systemctl reload apache2
+        certbot --apache -d mail.$DOMAIN
     fi
 fi
 
@@ -314,4 +363,4 @@ fi
 # 11. FINAL SUMMARY
 # -----------------------------------------------------------------------------
 whiptail --title "Installation Complete" --msgbox \
-"The setup process has completed successfully!\n\nAll webserver configs for $WEBSERVER have been copied into place.\nSecrets stored at: $SAVED_SECRETS_FILE" 12 70
+"The setup process has completed successfully!\n\nAll webserver configs for $WEBSERVER have been installed and SSL certificates generated via Certbot.\nSecrets stored at: $SAVED_SECRETS_FILE" 14 75
