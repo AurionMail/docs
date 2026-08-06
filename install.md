@@ -170,9 +170,8 @@ Some servers do not have enough CPU to build the app, so we let github build it 
 - sudo -u bulwark bash
 - wget https://github.com/bulwarkmail/webmail/releases/download/1.7.8/bulwark-standalone-1.7.8-linux-amd64.tar.gz 
 - tar -xvf bulwark-standalone-1.7.8-linux-amd64.tar.gz
-<!--- sudo chmod -R 755 /home/bulwark/webmail/node_modules/.bin-->
-- sudo find /home/bulwark/webmail/node_modules/next/dist/bin -type f -exec chmod 755 {} \; 2>/dev/null || true
 - sudo nano /etc/systemd/system/bulwark-webmail.service and add the content of the [service file](./conf/systemd/bulwark-webmail.service)
+- nano .env.local and add the content of [.env.local file](./conf/env/bulwark/.env.local).
 - sudo systemctl daemon-reload
 - sudo systemctl enable --now bulwark-webmail
 - add the webserver conf file, add https and enable it
