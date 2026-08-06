@@ -12,7 +12,7 @@ We assume this domain will send emails. Add these subdomains to its DNS Zone :
 - ldap : used by lldap webAdmin UI
 - api : used by Aurion Core API
 
-For testing with up to 30 users, 2GB cheap VPS is enough. In this tutorial, we will to use
+For testing with up to 30 users, 2GB cheap VPS is enough. In this tutorial, we will use
 - debian 13
 - apache2 or NGINX
 - certbot
@@ -20,11 +20,11 @@ For testing with up to 30 users, 2GB cheap VPS is enough. In this tutorial, we w
 - nodeJS 24 LTS
 ## Cheatsheet
 
-| Service |  Port Usage | Adress & Port | Domain | User | Update type | Path |
+| Service |  Port Usage | Address & Port | Domain | User | Update type | Path |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **LLDAP** |  UI | `127.0.0.1:17170` | `ldap.` | `lldap` | `AUTO (package manager)` | N/A |
 | **LLDAP** | LDAP (Protocol) | `127.0.0.1:3890` | - | `lldap` | `AUTO (package manager)` | N/A |
-| **Ory Hydra** | Authentification (Auth) | `127.0.0.1:4444` | `oauth.` | `aurion` | `MANUAL` |/home/aurion/aurionmail/hydra |
+| **Ory Hydra** | Authentication (Auth) | `127.0.0.1:4444` | `oauth.` | `aurion` | `MANUAL` |/home/aurion/aurionmail/hydra |
 | **Ory Hydra** | Administration (Admin) | `127.0.0.1:4445` | - | `aurion` | `MANUAL` | /home/aurion/aurionmail/hydra|
 | **SSO App** | Application SSO | `127.0.0.1:3030` | `sso.` | `aurion` | `MANUAL` |/home/aurion/aurionmail/sso |
 | **Cryptpad** | Web App  | `127.0.0.1:3010` | `pad.` / `sand.` | `pad` | `MANUAL` |/home/pad/cryptpad/ |
@@ -181,7 +181,7 @@ Some servers do not have enough CPU to build the app, so we let github build it 
 - now you can run `systemctl status bulwark-webmail.service` to get the admin temp key used to create the first admin and initiliaze the webmail.
 ## Aurion API
 - cd /home/aurion/aurionmail/api
-- sudo nano .env and the content of [.env file](./conf/env/api/.env)
+- sudo nano .env and add the content of [.env file](./conf/env/api/.env)
 
 - sudo -u postgres psql
 - CREATE USER aurionuser WITH PASSWORD AURION_DB_PASSWORD;
@@ -265,5 +265,5 @@ Navigate to webUI with your admin account, then : Authentication->Directories
 - Groups Claim : groups
 - don't forget to add your domain to username domain.
 Navigate to Authentication -> General: Select your created directory as the primary authentication directory
-### Crytpad
+### Cryptpad
 Nothing to do, it has been configured with "nano /home/pad/cryptpad/config/sso.js and add the content [sso file](./conf/env/pad/sso.js)" Remember ?
