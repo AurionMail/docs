@@ -33,6 +33,8 @@ For testing with up to 30 users, 2GB cheap VPS is enough. In this tutorial, we w
 | **Aurion API** | API | `127.0.0.1:8070` | `api.` | `aurion` | `MANUAL` | /home/aurion/aurionmail/api |
 | **Stalwart** | Mail Server | `127.0.0.1:8080` | `mail.` | `stalwart` | `MANUAL` | /opt/stalwart |
 | **Bridges** | Bridges | *Integrated with reverse proxy* | - | `aurion` | `MANUAL` |/home/aurion/aurionmail/bridges  |
+## Installation Script
+You can use the [installation script](install.sh) to install all or just parts of the system. If you use it, at the end, you will have to Add the Aurion PGP Plugin to bulwark. This step can't be automatised. 
 ## Users
 We need to create 3 users : `aurion`, `bulwark` and `pad`. `aurion` will handle the auth of the users, keys and core API. 
 - useradd -s /bin/false -m aurion
