@@ -253,7 +253,25 @@ Go to admin ui : https://web.DOMAIN_REPLACE_ME/admin then Authentication :
 - OAuth Issuer URL : https://oauth.DOMAIN_REPLACE_ME
 - Auto SSO : Activated
 #### Aurion PGP Plugin
-TODO
+To use Bulwark with Aurion, you need the Aurion PGP Plugin. This is the central part of AurionMail as this plugin enble users to encrypt mails and cryptpad documents.
+
+Now, because of restrcitions in plugin system of Bulwark, we can't just provide the zip file of the plugin. But don't worry ! It is very simple.
+- Download https://github.com/AurionMail/bulwark-pgp-plugin/releases/download/1.0.0/index.js 
+- Download https://github.com/AurionMail/bulwark-pgp-plugin/releases/download/1.0.0/manifest.json
+- The file you need to edit is the manifest. Indeed, Bulwark require all Origin used by a plugin to be in the manifest. So, you need to replace
+```
+"httpOrigins": [
+    "https://keys.openpgp.org",
+    "https://api.DOMAIN_REPLACE_ME"
+  ],
+    "frameOrigins": [
+    "https://pad.DOMAIN_REPLACE_ME"
+  ],
+```
+by your real domain
+- Zip `index.js` and `manifest.json` into a zip file and upload it in administration part of Bulwark
+- Enforce this plugin and go to the plugin Settings to write the API URL, OAuth URL and Pad URL.
+
 ### Stalwart
 Navigate to webUI with your admin account, then : Authentication->Directories 
 - Issuer URL : https://oauth.DOMAIN_REPLACE_ME

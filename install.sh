@@ -363,4 +363,4 @@ fi
 # 11. FINAL SUMMARY
 # -----------------------------------------------------------------------------
 whiptail --title "Installation Complete" --msgbox \
-"The setup process has completed successfully!\n\nAll webserver configs for $WEBSERVER have been installed and SSL certificates generated via Certbot.\nSecrets stored at: $SAVED_SECRETS_FILE" 14 75
+"The setup process has completed successfully!\n\nAll webserver configs for $WEBSERVER have been installed and SSL certificates generated via Certbot. You need to add the Plugin to Bulwark for Encryption and SSO integration. (See install.md)\nSecrets stored at: $SAVED_SECRETS_FILE" 14 75
