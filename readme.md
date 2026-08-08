@@ -8,8 +8,6 @@
 
 <br/>
 </div>
-
-# AurionMail Suite
 The AurionMail Suite is a free and open-source end-to-end encrypted productivity suite.
 
 **TL;DR:** AurionMail Suite delivers a Proton-like user experience by combining proven technologies such as CryptPad, Bulwark Webmail, Stalwart Mail Server, Ory Hydra, and OpenPGP.
