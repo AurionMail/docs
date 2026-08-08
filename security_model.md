@@ -34,16 +34,6 @@ We use iframes to communicate between origins. Each time, the origin of sender i
 ### Consequences
 - If someone wants to get the secret, it must access at same time the Disk of user and the RAM of Server.
 - If the user doesn't finish the sharing secret process, the secret is removed and local crypto is therefore useless. 
-## Main password 
-Once a account is created on LDAP, user must change its password on the SSO portal. If not changed, the user can't login.
-The real password used for auth is the argon2id derivation of the typed password, salt with the user's username `auth_salt_${username}`.
-## PGP key
-The PGP key is generated in Bulwark and encrypted with the argon2id derivation of user main password and a random salt generated when we generated the key. This new passphrase is used to encrypt the key in server and user local storage. 
-At same time, we generated an AES key with the main password and another random salt which is used to encrypt local search index and mails preview. 
-## Cryptpad secret
-To get the Cryptpad secret, we simply encrypt an hardcoded salt `cryptpad-plugin` with the generated AES key.
-
-
 ## Main Password & Authentication
 When an account is created in LDAP, the user must change their password on the SSO portal before logging in.
 The authentication payload sent to the server is an Argon2id hash derived from the user's typed password and salted with `auth_salt_${username}`.

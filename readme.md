@@ -12,6 +12,19 @@ AurionMail acts as the glue linking CryptPad and a JMAP-based email service into
 Users only need to remember **one single password** to encrypt and decrypt both their emails and CryptPad documents. You enter it once per session, whether you access CryptPad, the webmail, or both. Sounds like magic, doesn't it? 
 
 Additionally, we refreshed CryptPad's UI to make it modern and sleek.
+## Features supported
+- Use one password to auth en encrypt data
+- Single Logout : Loging out from webmail or cryptpad automaticaaly logout everywhere in device
+- Synchronisation of keys accros devices
+- For features of Cryptpad, refert to its documentation
+- For Feature of Webmail, refers to Bulwark documentation
+- For feature of PGP plugin, refers to its documentation
+
+Planned
+- change password
+- logout everywhere (all devices)
+- Emergency Account on-hold : when account is created, a secured link is generated. If someone visit this link, account is disabled. If someone discovers your main password, he won't be able to connect
+- Emergency Account removal : when account is created, a secured link is generated. If someone visit this link, account is destroyed. If someone want to access to your data, it is not possible anymore.
 ## Screenshots
 Here is some screenshots to convince you.
 ![Login](./screenshots/login.png)
