@@ -1,3 +1,13 @@
+<div align="center">
+
+<picture>
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/AurionMail/.github/main/assets/logo_dark.png" />
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/AurionMail/.github/main/assets/logo_light.png" />
+  <img src="https://raw.githubusercontent.com/AurionMail/.github/main/assets/logo_dark.png" alt="Aurion" width="300" />
+</picture>
+
+<br/>
+
 # AurionMail Suite
 The AurionMail Suite is a free and open-source end-to-end encrypted productivity suite.
 
