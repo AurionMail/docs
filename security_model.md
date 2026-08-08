@@ -1,52 +1,59 @@
-# AurionMail Security
-## General
-In this document, a "secret" is defined as something that could be used to decrypt user data by an admin. It can be the unencrypted PGP key or Cryptpad User password. Encrypted secrets are secrets that require (directly or not) the main password to be used to decrypt user data.
+# AurionMail Security Model
+## General Concepts
+
+In this document, a **secret** refers to any unencrypted data (such as a raw PGP private key or CryptPad seed) that could allow an administrator or attacker to decrypt user data. An **encrypted secret** requires the user's master password (or a key derived from it) to be decrypted.
+
 ### Scope
-This is in Aurion Scope
-- encrypt/decrypt emails with PGP in Bulwarkmail
-- generate and share with Cryptpad the user encryption secret
-- enable users to generate their main password used to decrypt their keys and derivate the cryptpad secret
 
-This is **not** in Aurion Scope
-- Cryptap secret management. Once the secret given to cryptpad, this is anymore in our scope.
-### Constraints
-- The password used to login never leave the user device.
-- The secrets never  leave the user device.
-For now, this is a classic Zero-Knowledge architecture. However, we add one final constraint :
-- The user has only one password to remember.
-- By default, the secrets never leave the RAM of user device. It means that a secret is never written on disk.
-- User should type their password only once per session maximum.
-## Sharing secrets
-We explain here the way we share secrets between a parent (P) and a child (C) (SSO, Bulwark, Cryptpad), respecting the previous constraints.
+**In Scope for AurionMail:**
+- End-to-end encryption/decryption of emails using PGP within Bulwark Webmail.
+- Generating and securely passing encryption secrets to CryptPad.
+- Enabling user-side derivation of master encryption keys from a single master password.
+
+**Out of Scope:**
+- Internal CryptPad secret lifecycle *after* handover. Once the secret is passed to CryptPad, data protection relies on CryptPad's native Zero-Knowledge architecture.
+
+### Security Guarantees & Constraints
+- **Zero-Knowledge Password:** The login password never leaves the user's device in plaintext.
+- **Zero-Knowledge Secrets:** Unencrypted secrets never leave the client device.
+- **Single Password UX:** Users maintain only one master password.
+- **In-Memory Operations:** Secrets are kept strictly in RAM on the client side and are never written to disk unencrypted.
+- **Single Prompt:** Users enter their passphrase at most once per active session.
+
+## Secret Sharing Protocol
+To transfer secrets securely between origins—such as Parent (P, e.g., SSO) and Child (C, e.g., Bulwark or CryptPad), without violating our security constraints:
 ### Steps
-1. P has a secret in RAM
-2. P generates a random seed and iv
-3. P use this values to generate a non extractible CryptoKey
-4. P encrypt the secret with the CryptoKey
-5. P sends to server the encrypted secret. It receives the secret ID
-6. P write in indexedDB of C the iv, seed and secret ID
-7. C generate the CryptoKey from iv and seed and fetch secret from server. 
-8. In RAM, C decrypt the secret with the CryptoKey
-### Server's Side
-The secrets are not stored in the database. They are kept in memory for 5min max. Normally, secrets should be freched during this time. If not, the secret is deleted.
-### How do we write in indexedDB in step 6 ?
-We use iframes to communicate between origins. Each time, the origin of sender is checked.
-### Consequences
-- If someone wants to get the secret, it must access at same time the Disk of user and the RAM of Server.
-- If the user doesn't finish the sharing secret process, the secret is removed and local crypto is therefore useless. 
-## Main Password & Authentication
-When an account is created in LDAP, the user must change their password on the SSO portal before logging in.
-The authentication payload sent to the server is an Argon2id hash derived from the user's typed password and salted with `auth_salt_${username}`.
+1. **P** holds an unencrypted secret in RAM.
+2. **P** generates a cryptographically secure random `seed` and initialization vector (`iv`).
+3. **P** uses these parameters to generate a non-extractable `CryptoKey` (`AES-GCM`).
+4. **P** encrypts the secret using the `CryptoKey`.
+5. **P** transmits the encrypted secret to the server and receives a temporary `secret_id`.
+6. **P** writes the `iv`, `seed`, and `secret_id` into **C**'s `IndexedDB` storage via a secure cross-origin mechanism.
+7. **C** reconstructs the `CryptoKey` using the local `iv` and `seed`, then fetches the encrypted secret from the server using the `secret_id`.
+8. **C** decrypts the secret in RAM using the reconstructed `CryptoKey`.
 
-## Key Derivation & PGP Storage
+### Server-Side Ephemeral Storage
+The server does not store secrets in persistent storage. Encrypted payloads are held in volatile memory with a **5-minute maximum TTL**. If a child origin does not claim the secret within 5 minutes, it is purged automatically.
+
+### Cross-Origin Communication
+To write parameters into child storage (Step 6), communication is handled via embedded `iframe` elements using `postMessage`. Every incoming message explicitly validates `event.origin` against an allowed list before execution.
+
+### Security Consequences
+- To compromise a secret, an attacker must simultaneously gain access to the **user's local storage/disk** and the **server's volatile RAM** within the 5-minute window.
+- Abandoning the flow midway results in server-side secret deletion, rendering localized parameters useless.
+
+## Authentication & Key Derivation
+### Main Password & Authentication
+When an account is provisioned in LDAP, the user sets their password via the SSO portal. 
+The authentication payload sent over the wire is an **Argon2id** hash derived client-side from the user's password using the salt format `auth_salt_${username}`.
 
 ### Key Derivation Strategy
-Upon account unlock or key import, a single Argon2id execution processes the user's passphrase and a 16-byte random salt to generate a **Master HKDF Key**.
+Upon account unlock or key import, a single **Argon2id** computation processes the master passphrase along with a 16-byte random salt to yield a **Master HKDF Key**.
 
-Using **HKDF** (`SHA-256`), domain-isolated sub-keys are instantly derived without re-executing Argon2id:
-- **PGP Wrapping Key** (`info: "pgp-wrapping-key"`): An AES-GCM 256-bit key used to encrypt the OpenPGP private key at rest (in IndexedDB or server storage).
-- **Local Index + Secret AES Key** (`info: "aes-key"`): An AES-GCM 256-bit key used to encrypt local mail previews, search indexes and provide secret such as cryptpad.
+Using **HKDF (SHA-256)**, domain-isolated sub-keys are derived instantly without requiring repeated, computationally expensive Argon2id executions:
+- **PGP Wrapping Key** (`info: "pgp-wrapping-key"`): An `AES-GCM 256-bit` key used to encrypt the OpenPGP private key at rest (in IndexedDB or server sync storage).
+- **Local Index & Secret AES Key** (`info: "aes-key"`): An `AES-GCM 256-bit` key used for local mail preview encryption, search indexing, and deterministic secret generation.
+## CryptPad Secret Generation
+To eliminate Known-Plaintext Attack (KPA) vectors and avoid persisting any CryptPad seed to disk:
 
-## Cryptpad Secret
-To eliminate Known-Plaintext Attack (KPA) vectors and avoid storing any Cryptpad seed on disk:
-The Cryptpad secret is generated on the fly by encrypting a fixed static string (`plugin-cryptpad`) with the user's session AES key (`aesKey`), then hashing the output with `SHA-256`. Because the session key is unique per user, the resulting 256-bit secret is deterministic for the user but unpredictable to external attackers. No extra files or seeds are saved to IndexedDB or the server database.
+The CryptPad secret is derived dynamically in memory by encrypting a fixed static string (`plugin-cryptpad`) using the user's active session key (`aesKey`), followed by a `SHA-256` hashing pass. Because `aesKey` is unique to each user session context, the derived 256-bit secret is deterministic for the user while remaining unpredictable to external observers. No intermediate seeds or secret tokens are written to disk or sent to the backend database.

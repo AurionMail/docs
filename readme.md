@@ -1,57 +1,58 @@
 # AurionMail Suite
-The AurionMail Suite is a free and open-source end-to-end encrypted work suite. 
+The AurionMail Suite is a free and open-source end-to-end encrypted productivity suite.
 
-**TL;DR:** AurionMail Suite offers a Proton-like experience. It relies on proven technologies like CryptPad, Bulwark Webmail, Stalwart Mail Server, Ory Hydra, and PGP.
+**TL;DR:** AurionMail Suite delivers a Proton-like user experience by combining proven technologies such as CryptPad, Bulwark Webmail, Stalwart Mail Server, Ory Hydra, and OpenPGP.
 
 ## The Problem
-CryptPad is a powerful collaborative tool, but it doesn't include email—which is outside its scope. As a result, using encrypted documents and encrypted emails usually requires two separate accounts and passwords. 
+CryptPad is a powerful collaborative suite, but email falls outside its core scope. Consequently, using encrypted documents alongside encrypted emails traditionally requires managing two separate accounts and passwords.
 
-AurionMail acts as the glue linking CryptPad and a JMAP-based email service into a seamless workflow.
+AurionMail acts as the orchestrator linking CryptPad and a JMAP-based email service into a single, unified workflow.
 
 ## What does this mean for the user?
-Users only need to remember **one single password** to encrypt and decrypt both their emails and CryptPad documents. You enter it once per session, whether you access CryptPad, the webmail, or both. Sounds like magic, doesn't it? 
+Users only need to remember **one single password** to encrypt and decrypt both their emails and CryptPad documents. You enter it once per session to access CryptPad, the webmail, or both.
 
-Additionally, we refreshed CryptPad's UI to make it modern and sleek.
-## Features supported
-- Use one password to auth en encrypt data
-- Single Logout : Loging out from webmail or cryptpad automaticaaly logout everywhere in device
-- Synchronisation of keys accros devices
-- For features of Cryptpad, refert to its documentation
-- For Feature of Webmail, refers to Bulwark documentation
-- For feature of PGP plugin, refers to its documentation
+Additionally, we refreshed CryptPad's UI to provide a modern, cohesive look and feel across the suite.
+## Features
+### Currently Supported
+- **Single Password Encryption:** Authenticate and encrypt all user data with one master password.
+- **Single Logout:** Logging out from either Webmail or CryptPad automatically logs you out across the entire session/device.
+- **Key Synchronization:** Seamless key syncing across authorized user devices.
+- **Core Integrations:** Full feature sets inherited from underlying services ([CryptPad](https://docs.cryptpad.org/) and [Bulwark Webmail](https://github.com/bulwarkmail/webmail/)).
 
-Planned
-- change password
-- logout everywhere (all devices)
-- Emergency Account on-hold : when account is created, a secured link is generated. If someone visit this link, account is disabled. If someone discovers your main password, he won't be able to connect
-- Emergency Account removal : when account is created, a secured link is generated. If someone visit this link, account is destroyed. If someone want to access to your data, it is not possible anymore.
+### Roadmap / Planned Features
+- Password change mechanism.
+- Global Logout ("Logout from all devices").
+- **Emergency Account Hold:** A secure URL generated at account creation that disables the account if accessed (protecting data if a master password is compromised).
+- **Emergency Account Destruction:** A secure URL that permanently destroys the account and its associated keys if visited.
+
 ## Screenshots
-Here is some screenshots to convince you.
 ![Login](./screenshots/login.png)
 ![Logout](./screenshots/logout.png)
 ![Keys](./screenshots/keys.png)
 ![Cryptpad](./screenshots/cryptpad.png)
-## How ?
-Here is what we use. Items in bold are what was code by Aurion Team.
-- LDAP for user managment. This is the source of truth for users
-- Ory Hydra for the SSO Backend. it handle the login process
-- **SSO Web App for SSO fronted**. It handle the login/logout of users and is used to let users use one password to login and to decrypt their data and keeping out system 0K
-- Stalwart Server : Used as a JMAP backend for the emails
-- Bulwark Webmail : The Mail fronted. Alone, it doesn't handle encryption.
-- **Bulwark PGP Plugin** : A Bulwark Plugin used ton encrypt emails end provide users a proton-like experience
-- **Core-API** : The core server of AurionMail. It handle the sync of the keys of users, the connexion with webmail and cryptpad.
-- **Bridges** : Some littles files used during login/logout to communicate with the apps to share secrets
-- Cryptpad with SSO Plugin and **customized with our files** to integrate better with the webmail and provide a better UI
-As you may notice, we won't provide a single binary
-## Want more screenshots or just curious ?
-You can go to the repos of the part you want to explore
+
+## Architecture Overview
+Here is how the components fit together. Items highlighted in **bold** are built by the Aurion team:
+
+- LDAP: User management (Identity Source of Truth).
+- Ory Hydra: SSO OAuth2/OIDC backend handling authorization flows.
+- **SSO Web App:** Frontend for authentication and Zero-Knowledge (0K) key derivation.
+- Stalwart Server: High-performance JMAP mail server backend.
+- Bulwark Webmail: Webmail frontend interface.
+- **Bulwark PGP Plugin:** Extension enabling end-to-end OpenPGP mail encryption.
+- **Core-API:** Central server managing key sync, session state, and inter-app communication.
+- **Bridges:** Lightweight bridge scripts handling secure secret sharing during login/logout routines.
+- **CryptPad (Customized):** Integrated with an SSO plugin and custom styling for a unified UI.
+
+*Note: AurionMail is a distributed suite and does not ship as a monolithic single binary.*
+
+## Repositories & Components
+Explore the individual sub-modules of the project:
 - [SSO App](https://github.com/aurionMail/sso)
 - [Bridges](https://github.com/AurionMail/bridges/)
 - [PGP Plugin](https://github.com/AurionMail/bulwark-pgp-plugin)
 - [Core API](https://github.com/AurionMail/core-api/)
-- [Cryptpad Customized](https://github.com/AurionMail/cryptpad_customized/)
-## Lets' deep in
-### I am an end user
-TODO
-### I am a sysadmin and I want to give a try
-Let's go to [Install](./install.md) to begin the journey
+- [CryptPad Customized](https://github.com/AurionMail/cryptpad_customized/)
+
+## Getting Started
+Are you a system administrator looking to test AurionMail? Check out the [Installation Guide](./install.md).
