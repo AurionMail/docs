@@ -7,6 +7,7 @@
 </picture>
 
 <br/>
+</div>
 
 # AurionMail Suite
 The AurionMail Suite is a free and open-source end-to-end encrypted productivity suite.
