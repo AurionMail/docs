@@ -12,6 +12,26 @@ AurionMail acts as the orchestrator linking CryptPad and a JMAP-based email serv
 Users only need to remember **one single password** to encrypt and decrypt both their emails and CryptPad documents. You enter it once per session to access CryptPad, the webmail, or both.
 
 Additionally, we refreshed CryptPad's UI to provide a modern, cohesive look and feel across the suite.
+## Why AurionMail Suite?
+
+Existing privacy solutions usually force a compromise between **user experience**, **self-hosting control**, and **open standards**. 
+
+Commercial suites offer a seamless single-password workflow, but their backends remain closed-source. On the other hand, self-hosted alternatives often fragment the user experience, requiring users to manage separate accounts and passwords for email and document collaboration.
+
+AurionMail Suite bridges this gap by delivering the smooth Zero-Knowledge experience of commercial platforms on top of a 100% open-source, standards-compliant, self-hosted stack.
+
+| Feature | Proton Suite | Nextcloud + Mail | Standard CryptPad | **AurionMail Suite** |
+| :--- | :---: | :---: | :---: | :---: |
+| **100% Open Source & Self-Hosted** | ❌ *(Proprietary backend)* | 🟢 Yes | 🟢 Yes | 🟢 **Yes** |
+| **E2EE Email & Documents** | 🟢 Yes | 🟡 *(Partial)* | ❌ *(Docs only)* | 🟢 **Yes** |
+| **Single Zero-Knowledge Password** | 🟢 Yes | ❌ *(Separate passwords)* | ❌ *(No mail)* | 🟢 **Yes** |
+| **Open Standards (OpenPGP, JMAP)** | ❌ *(Proprietary stack)* | 🟢 Yes | 🟢 Yes | 🟢 **Yes** |
+
+### Key Advantages
+- **Proton-like UX, Self-Hosted Freedom:** Enjoy an all-in-one productivity workflow while keeping complete control over your server and data.
+- **Zero-Friction Encryption:** One master password handles client-side authentication and encryption across both webmail and CryptPad without prompting for extra passphrases.
+- **No Vendor Lock-in:** Built entirely on established standards like **OpenPGP**, **JMAP**, and **OAuth2/OIDC**, ensuring your data remains fully portable.
+
 ## Features
 ### Currently Supported
 - **Single Password Encryption:** Authenticate and encrypt all user data with one master password.
@@ -36,7 +56,7 @@ Here is how the components fit together. Items highlighted in **bold** are built
 
 - LDAP: User management (Identity Source of Truth).
 - Ory Hydra: SSO OAuth2/OIDC backend handling authorization flows.
-- **SSO Web App:** Frontend for authentication and Zero-Knowledge (0K) key derivation.
+- **SSO Web App:** Frontend for authentication and Zero-Knowledge key derivation.
 - Stalwart Server: High-performance JMAP mail server backend.
 - Bulwark Webmail: Webmail frontend interface.
 - **Bulwark PGP Plugin:** Extension enabling end-to-end OpenPGP mail encryption.
