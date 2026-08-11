@@ -45,12 +45,12 @@ AurionMail Suite bridges this gap by delivering the smooth Zero-Knowledge experi
 ### Currently Supported
 - **Single Password Encryption:** Authenticate and encrypt all user data with one master password.
 - **Single Logout:** Logging out from either Webmail or CryptPad automatically logs you out across the entire session/device.
+- **Global Logout** ("Logout from all devices").
 - **Key Synchronization:** Seamless key syncing across authorized user devices.
 - **Core Integrations:** Full feature sets inherited from underlying services ([CryptPad](https://docs.cryptpad.org/) and [Bulwark Webmail](https://github.com/bulwarkmail/webmail/)).
 
 ### Roadmap / Planned Features
 - Password change mechanism.
-- Global Logout ("Logout from all devices").
 - **Emergency Account Hold:** A secure URL generated at account creation that disables the account if accessed (protecting data if a master password is compromised).
 - **Emergency Account Destruction:** A secure URL that permanently destroys the account and its associated keys if visited.
 
