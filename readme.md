@@ -47,7 +47,7 @@ AurionMail Suite bridges this gap by delivering the smooth Zero-Knowledge experi
 - **Single Logout:** Logging out from either Webmail or CryptPad automatically logs you out across the entire session/device.
 - **Global Logout** ("Logout from all devices").
 - **Key Synchronization:** Seamless key syncing across authorized user devices.
-- **Core Integrations:** Full feature sets inherited from underlying services ([CryptPad](https://docs.cryptpad.org/) and [Bulwark Webmail](https://github.com/bulwarkmail/webmail/)).
+- **Core Integrations:** Full feature sets inherited from underlying services ([CryptPad](https://docs.cryptpad.org/),  [Bulwark Webmail](https://github.com/bulwarkmail/webmail/) and the [PGP E2E Plugin for Bulwark](https://github.com/paulhenry46/pgp-plugin)).
 
 ### Roadmap / Planned Features
 - Password change mechanism.
