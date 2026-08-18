@@ -8,6 +8,23 @@ Run the [Installation Script](https://stalw.art/docs/install/platform/linux/) pr
 Warning : We will soon enable the OIDC provider in stalwart. As a result, we won't be able to connect to admin account in admin webUI. So, you need to add the env variable STALWART_RECOVERY_ADMIN=admin:STALWART_ADMIN_PASSWORD.
 - sudo nano /etc/stalwart/stalwart.env
 - Now, go to admin/Settings/x:Http/HttpSecurity/singleton and check permissve CORS to allow bulwark to connect.
+## LDAP
+- We use lldap from the [debian repo](https://software.opensuse.org//download.html?project=home%3AMasgalor%3ALLDAP&package=lldap) :
+```
+echo 'deb http://download.opensuse.org/repositories/home:/Masgalor:/LLDAP/Debian_13/ /' | sudo tee /etc/apt/sources.list.d/home:Masgalor:LLDAP.list
+curl -fsSL https://download.opensuse.org/repositories/home:Masgalor:LLDAP/Debian_13/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_Masgalor_LLDAP.gpg > /dev/null
+sudo apt update
+```
+- sudo apt install lldap lldap-extras
+- edit conf file at `/etc/lldap/lldap_config.toml`
+    - ldap_host = "127.0.0.1"
+    - http_host = "127.0.0.1"
+    - jwt_secret = "LDAP_JWT"
+    - ldap_base_dn = "dc=DOMAINSTART,dc=DOMAINEND" :  for reference, with aurionmail.org, we would use dc=aurionmail,dc=org
+The default admin user is admin / password . Once connected throught the webUI, delete it and add a new admin user.
+- add the webserver conf file, add https and enable it
+    - [apache](./conf/apache/ldap.conf)
+    - [nginx](./conf/nginx/ldap.domain)
 ## Ory Hydra
 - sudo -i -u postgres
 - createdb hydra
