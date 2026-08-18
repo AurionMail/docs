@@ -73,8 +73,14 @@ Here is how the components fit together. Items highlighted in **bold** are built
 - **Bridges:** Lightweight bridge scripts handling secure secret sharing during login/logout routines.
 - **CryptPad (Customized):** Integrated with an SSO plugin and custom styling for a unified UI.
 
-*Note: AurionMail is a distributed suite and does not ship as a monolithic single binary.*
-
+AurionMail is a distributed suite. However, you can use [Orchestra](https://github.com/AurionMail/orchestra) to get a single binary covering
+- Hydra
+- SSO
+- Bulwark
+- Core API
+- Bridges
+- Cryptpad Customized
+See [Installation Guide](./install.md) for more details.
 ## Repositories & Components
 Explore the individual sub-modules of the project:
 - [SSO App](https://github.com/aurionMail/sso)
@@ -82,6 +88,7 @@ Explore the individual sub-modules of the project:
 - [PGP Plugin](https://github.com/AurionMail/bulwark-pgp-plugin)
 - [Core API](https://github.com/AurionMail/core-api/)
 - [CryptPad Customized](https://github.com/AurionMail/cryptpad_customized/)
+- [Orchestra](https://github.com/AurionMail/orchestra)
 
 ## Getting Started
 Are you a system administrator looking to test AurionMail? Check out the [Installation Guide](./install.md).
