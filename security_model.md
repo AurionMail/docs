@@ -33,7 +33,7 @@ To transfer secrets securely between origins—such as Parent (P, e.g., SSO) and
 8. **C** decrypts the secret in RAM using the reconstructed `CryptoKey`.
 
 ### Server-Side Ephemeral Storage
-The server does not store secrets in persistent storage. Encrypted payloads are held in volatile memory with a **5-minute maximum TTL**. If a child origin does not claim the secret within 5 minutes, it is purged automatically.
+The server does not store secrets in persistent storage. Encrypted payloads are held in volatile memory with a **5-minute maximum TTL**. If a child origin does not claim the secret within 5 minutes, it is purged automatically. When a secret is retrieved, it is purged from memory (Burn-on-Read).
 
 ### Cross-Origin Communication
 To write parameters into child storage (Step 6), communication is handled via embedded `iframe` elements using `postMessage`. Every incoming message explicitly validates `event.origin` against an allowed list before execution.
@@ -52,8 +52,9 @@ Upon account unlock or key import, a single **Argon2id** computation processes t
 
 Using **HKDF (SHA-256)**, domain-isolated sub-keys are derived instantly without requiring repeated, computationally expensive Argon2id executions:
 - **PGP Wrapping Key** (`info: "pgp-wrapping-key"`): An `AES-GCM 256-bit` key used to encrypt the OpenPGP private key at rest (in IndexedDB or server sync storage).
-- **Local Index & Secret AES Key** (`info: "aes-key"`): An `AES-GCM 256-bit` key used for local mail preview encryption, search indexing, and deterministic secret generation.
+- **Local Index AES Key** (`info: "aes-key"`): An `AES-GCM 256-bit` key used for local mail preview encryption, search indexing.
+- **Cryptpad Secret**  (`info: "hmac-key"`) An `HMAC` key used for generating Cryptpad secret.
 ## CryptPad Secret Generation
 To eliminate Known-Plaintext Attack (KPA) vectors and avoid persisting any CryptPad seed to disk:
 
-The CryptPad secret is derived dynamically in memory by encrypting a fixed static string (`plugin-cryptpad`) using the user's active session key (`aesKey`), followed by a `SHA-256` hashing pass. Because `aesKey` is unique to each user session context, the derived 256-bit secret is deterministic for the user while remaining unpredictable to external observers. No intermediate seeds or secret tokens are written to disk or sent to the backend database.
+The CryptPad secret is derived dynamically in memory by encrypting a fixed static string (`plugin-cryptpad`) using the user's active session key (`hmacKey`). Because `hmacKey` is unique to each user session context, the derived secret is deterministic for the user while remaining unpredictable to external observers. No intermediate seeds or secret tokens are written to disk or sent to the backend database.
