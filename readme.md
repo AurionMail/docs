@@ -7,6 +7,7 @@
 </picture>
 
 <br/>
+<br/>
 </div>
 The AurionMail Suite is a free and open-source end-to-end encrypted productivity suite.
 
@@ -33,32 +34,51 @@ AurionMail Suite bridges this gap by delivering the smooth Zero-Knowledge experi
 | :--- | :---: | :---: | :---: | :---: |
 | **100% Open Source & Self-Hosted** | ❌ *(Proprietary backend)* | 🟢 Yes | 🟢 Yes | 🟢 **Yes** |
 | **E2EE Email & Documents** | 🟢 Yes | 🟡 *(Partial)* | ❌ *(Docs only)* | 🟢 **Yes** |
-| **Single Zero-Knowledge Password** | 🟢 Yes | ❌ *(Separate passwords)* | ❌ *(No mail)* | 🟢 **Yes** |
+| **Single Zero-Knowledge Password** | 🟢 Yes | ❌ *(Separate passwords)* | ❌ *(Separate password SSO/encryption)* | 🟢 **Yes** |
 | **Open Standards (OpenPGP, JMAP)** | ❌ *(Proprietary stack)* | 🟢 Yes | 🟢 Yes | 🟢 **Yes** |
-
-### Key Advantages
-- **Proton-like UX, Self-Hosted Freedom:** Enjoy an all-in-one productivity workflow while keeping complete control over your server and data.
-- **Zero-Friction Encryption:** One master password handles client-side authentication and encryption across both webmail and CryptPad without prompting for extra passphrases.
-- **No Vendor Lock-in:** Built entirely on established standards like **OpenPGP**, **JMAP**, and **OAuth2/OIDC**, ensuring your data remains fully portable.
 
 ## Features
 ### Currently Supported
 - **Single Password Encryption:** Authenticate and encrypt all user data with one master password.
 - **Single Logout:** Logging out from either Webmail or CryptPad automatically logs you out across the entire session/device.
 - **Global Logout** ("Logout from all devices").
+- **Password change** Change your master password without loosing your data.
 - **Key Synchronization:** Seamless key syncing across authorized user devices.
 - **Core Integrations:** Full feature sets inherited from underlying services ([CryptPad](https://docs.cryptpad.org/),  [Bulwark Webmail](https://github.com/bulwarkmail/webmail/) and the [PGP E2E Plugin for Bulwark](https://github.com/paulhenry46/pgp-plugin)).
+- **Account install** : You can create users in LDAP with your workflow and give them a temporary password. Users then visit sso.domain/init to create their master password and activate their account.
 
 ### Roadmap / Planned Features
-- Password change mechanism.
 - **Emergency Account Hold:** A secure URL generated at account creation that disables the account if accessed (protecting data if a master password is compromised).
 - **Emergency Account Destruction:** A secure URL that permanently destroys the account and its associated keys if visited.
 
 ## Screenshots
-![Login](./screenshots/login.png)
-![Logout](./screenshots/logout.png)
-![Keys](./screenshots/keys.png)
-![Cryptpad](./screenshots/cryptpad.png)
+
+<table>
+<tr>
+<td width="50%"><img src="screenshots/login.png" alt="Login" /></td>
+<td width="50%"><img src="screenshots/logout.png" alt="Logout" /></td>
+</tr>
+<tr>
+<td><sub><b>Login</b> – Login page.</sub></td>
+<td><sub><b>Logout</b> – Logout page.</sub></td>
+</tr>
+<tr>
+<td><img src="screenshots/keys.png" alt="Keys" /></td>
+<td><img src="screenshots/mails.png" alt="Mails" /></td>
+</tr>
+<tr>
+<td><sub><b>Bulwark's Aurion Plugin</b> – Manage keys, change password, with the Aurion Plugin.</sub></td>
+<td><sub><b>Email Encryption</b> – Send encryptped emails to your contacts.</sub></td>
+</tr>
+<tr>
+<td><img src="screenshots/cryptpad.png" alt="Light mode" /></td>
+<td><img src="screenshots/settings.png" alt="Settings" /></td>
+</tr>
+<tr>
+<td><sub><b>Cryptpad Drive</b> – Cryptpad is integrated with a refreshed and modern UI</sub></td>
+<td><sub><b>Cryptpad Settings</b> – You can still edit your cryptpad settings.</sub></td>
+</tr>
+</table>
 
 ## Architecture Overview
 Here is how the components fit together. Items highlighted in **bold** are built by the Aurion team:

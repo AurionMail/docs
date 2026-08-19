@@ -20,28 +20,29 @@ For testing with up to 30 users, 2GB cheap VPS is enough. In this tutorial, we w
 - nodeJS 24 LTS
 ## Cheatsheet
 
-| Service |  Port Usage | Address & Port | Domain | User | Update type | Path |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **LLDAP** |  UI | `127.0.0.1:17170` | `ldap.` | `lldap` | `AUTO (package manager)` | N/A |
-| **LLDAP** | LDAP (Protocol) | `127.0.0.1:3890` | - | `lldap` | `AUTO (package manager)` | N/A |
-| **Ory Hydra** | Authentication (Auth) | `127.0.0.1:4444` | `oauth.` | `aurion` | `MANUAL` |/home/aurion/aurionmail/hydra |
-| **Ory Hydra** | Administration (Admin) | `127.0.0.1:4445` | - | `aurion` | `MANUAL` | /home/aurion/aurionmail/hydra|
-| **SSO App** | Application SSO | `127.0.0.1:3030` | `sso.` | `aurion` | `MANUAL` |/home/aurion/aurionmail/sso |
-| **Cryptpad** | Web App  | `127.0.0.1:3010` | `pad.` / `sand.` | `pad` | `MANUAL` |/home/pad/cryptpad/ |
-| **Cryptpad** | WebSockets | `127.0.0.1:3013` | `pad.` / `sand.` | `pad` | `MANUAL` | /home/pad/cryptpad|
-| **Bulwark Webmail** | Webmail UI | `127.0.0.1:3000` | `web.` | `bulwark` | `MANUAL` |/home/bulwark/webmail |
-| **Aurion API** | API | `127.0.0.1:8070` | `api.` | `aurion` | `MANUAL` | /home/aurion/aurionmail/api |
-| **Stalwart** | Mail Server | `127.0.0.1:8080` | `mail.` | `stalwart` | `MANUAL` | /opt/stalwart |
-| **Bridges** | Bridges | *Integrated with reverse proxy* | - | `aurion` | `MANUAL` |/home/aurion/aurionmail/bridges  |
+| Service |  Port Usage | Address & Port | Domain | User | Update type | Path | in Orchestra |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **LLDAP** |  UI | `127.0.0.1:17170` | `ldap.` | `lldap` | `AUTO (package manager)` | N/A | ❌ No |
+| **LLDAP** | LDAP (Protocol) | `127.0.0.1:3890` | - | `lldap` | `AUTO (package manager)` | N/A | ❌ No |
+| **Ory Hydra** | Authentication (Auth) | `127.0.0.1:4444` | `oauth.` | `aurion` | `MANUAL` |/home/aurion/aurionmail/hydra | 🟢 Yes |
+| **Ory Hydra** | Administration (Admin) | `127.0.0.1:4445` | - | `aurion` | `MANUAL` | /home/aurion/aurionmail/hydra| 🟢 Yes |
+| **SSO App** | Application SSO | `127.0.0.1:3030` | `sso.` | `aurion` | `MANUAL` |/home/aurion/aurionmail/sso | 🟢 Yes |
+| **Cryptpad** | Web App  | `127.0.0.1:3010` | `pad.` / `sand.` | `pad` | `MANUAL` |/home/pad/cryptpad/ | 🟢 Yes |
+| **Cryptpad** | WebSockets | `127.0.0.1:3013` | `pad.` / `sand.` | `pad` | `MANUAL` | /home/pad/cryptpad| 🟢 Yes |
+| **Bulwark Webmail** | Webmail UI | `127.0.0.1:3000` | `web.` | `bulwark` | `MANUAL` |/home/bulwark/webmail | 🟢 Yes |
+| **Aurion API** | API | `127.0.0.1:8070` | `api.` | `aurion` | `MANUAL` | /home/aurion/aurionmail/api | 🟢 Yes |
+| **Stalwart** | Mail Server | `127.0.0.1:8080` | `mail.` | `stalwart` | `MANUAL` | /opt/stalwart | ❌ No |
+| **Bridges** | Bridges | *Integrated with reverse proxy* | - | `aurion` | `MANUAL` |/home/aurion/aurionmail/bridges  | 🟢 Yes |
 ## Alternative methods
 ### Orchestra (Experimental)
-If you want to something which works in minutes, without installing node, you can use [Aurion Orchestra](./install_with_orchestra.md). It is a single GO binary with 
+If you want something which works in minutes, without installing node, you can use [Aurion Orchestra](./install_with_orchestra.md). It is a single GO binary with 
 - Cryptpad (without Collabora)
 - Bulwark
 - Hydra + SSO
 - Aurion API
 - node
-You have just one port and one NGINX file to manage. All complicated configuration is done by the binary. It's magic ! This is not recomanded if you have already have installed Cryptpad or if you want to entierely keep control on your configuration, but it is the easier way to start with Aurion. It is experimental, so if you have bugs, something weird, open an issue ! 
+
+You have just one port and one NGINX file to manage. All complicated configuration is done by the binary. It's magic ! This is not recomanded if you have already installed Cryptpad or if you want to entierely keep control on your configuration, but it is the easier way to start with Aurion. It is experimental, so if you have bugs, something weird, open an issue ! 
 ### Installation Script
 You can use the [installation script](install.sh) to install all or just parts of the system. If you use it, at the end, you will have to Add the Aurion PGP Plugin to bulwark. This step can't be automatised.
 ## Users
