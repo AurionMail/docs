@@ -109,6 +109,7 @@ AurionMail is a distributed suite. However, you can use [Orchestra](https://gith
 - Core API
 - Bridges
 - Cryptpad Customized
+
 See [Installation Guide](./install.md) for more details.
 ## Repositories & Components
 Explore the individual sub-modules of the project:

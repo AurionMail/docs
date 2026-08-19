@@ -55,12 +55,13 @@ The default admin user is admin / password . Once connected throught the webUI, 
 - ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO aurionuser;
 - ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO aurionuser;
 ## Aurion Orchestra
-- download lates binary and edit .env
+- first, create the user who will run aurion : `- useradd -s /bin/false -m aurion`
+- download latest binary at https://github.com/AurionMail/orchestra/releases and edit .env file.
 - launch orchestra
 - you will see in logs the migrations for hydra and Aurion API happening
 - after that, you will a link to finsih install of cryptpad, use it
 - you will see a link to finish install of Bulwark webmail, use it
-- That's it !
+- You can use `orchestra.service` file to launch aurion as a service.
 # Configure Auth
 All we need is now installed. We must now configure the SSO.
 ## Config Hydra
