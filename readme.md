@@ -31,11 +31,20 @@ Commercial suites offer a seamless single-password workflow, but their backends 
 AurionMail Suite bridges this gap by delivering the smooth Zero-Knowledge experience of commercial platforms on top of a 100% open-source, standards-compliant, self-hosted stack.
 
 | Feature | Proton Suite | Nextcloud + Mail | Standard CryptPad | **AurionMail Suite** |
-| :--- | :---: | :---: | :---: | :---: |
+| --- | --- | --- | --- | --- |
 | **100% Open Source & Self-Hosted** | ❌ *(Proprietary backend)* | 🟢 Yes | 🟢 Yes | 🟢 **Yes** |
-| **E2EE Email & Documents** | 🟢 Yes | 🟡 *(Partial)* | ❌ *(Docs only)* | 🟢 **Yes** |
-| **Single Zero-Knowledge Password** | 🟢 Yes | ❌ *(Separate passwords)* | ❌ *(Separate password SSO/encryption)* | 🟢 **Yes** |
-| **Open Standards (OpenPGP, JMAP)** | ❌ *(Proprietary stack)* | 🟢 Yes | 🟢 Yes | 🟢 **Yes** |
+| **E2EE Email & Documents** | 🟢 Yes | 🟡 *(Complex / Plugin-based)* | ❌ *(No built-in email)* | 🟢 **Yes** |
+| **Unified Identity & Encryption (1 Password)** | 🟢 Yes | ❌ *(Fragmented SSO / Manual PGP)* | ❌ *(Docs-only account scope)* | 🟢 **Yes** |
+| **Open Standards (OpenPGP, JMAP)** | 🟡 *(OpenPGP supported, limited key discovery)* | 🟢 Yes | ❌ *(N/A for email)* | 🟢 **Yes** |
+
+#### vs. Standard CryptPad
+CryptPad excels at secure document collaboration but lacks email. AurionMail extends CryptPad with a fully integrated, E2EE JMAP email client—sharing the same single Zero-Knowledge password so users don't have to manage two isolated systems.
+
+#### vs. Nextcloud + Mail
+Nextcloud Mail is a standard IMAP client that relies on browser extensions (like Mailvelope) and manual PGP key management for end-to-end encryption. AurionMail delivers seamless, out-of-the-box Zero-Knowledge encryption without complex user workflows.
+
+#### vs. Proton Suite
+Proton offers a smooth single-password experience, but its backend is closed-source and locks you into their cloud. AurionMail gives you that exact same seamless user experience on a 100% open-source, self-hosted stack built on open standards.
 
 ## Features
 ### Currently Supported
