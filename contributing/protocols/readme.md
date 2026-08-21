@@ -1,0 +1,1 @@
+These files are intended to understand how the code works. Indeed, as a distributed suite, it may difficult to understand how bridges/plugin/iframe works.
