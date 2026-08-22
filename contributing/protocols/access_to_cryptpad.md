@@ -18,5 +18,5 @@ We assume the keys have been unlocked
 5. Redirect to pad.domain/login?from=aurion
 6. `ssoauth.js` page load secret and decrypt
 7. user is redirected to /drive
-8. `pre-loading.js` remove IndexedDB key data (TODO : move to `ssoauth.js`)
+8. `pre-loading.js` remove IndexedDB key. The function is called when accessing /drive. If we relie on `ssoauth.js` to purge secret data, if user is already loged , `ssoauth.js` is never called and the secret is not purged.
 9. `drive/inner.js` load metada to show UI
