@@ -58,14 +58,86 @@ The default admin user is admin / password . Once connected throught the webUI, 
 - first, create the user who will run aurion : `- useradd -s /bin/false -m aurion`
 - download latest binary at https://github.com/AurionMail/orchestra/releases and edit .env file.
 - launch orchestra
-- you will see in logs the migrations for hydra and Aurion API happening
-- after that, you will a link to finsih install of cryptpad, use it
+- you will see in logs the migrations for hydra and Aurion API happening. At the end, you whould see something like this
+```
+2026/08/23 11:48:20 ==================================================
+2026/08/23 11:48:20      Starting Aurion Orchestrator Binary          
+2026/08/23 11:48:20 ==================================================
+2026/08/23 11:48:20 [main] Config loaded. Domain: aurionmail.org, DataDir: /home/aurion/orchestra, ProxyPort: 8090
+2026/08/23 11:48:20 [runner] Unpacking runtime assets to /home/aurion/orchestra/runtime...
+2026/08/23 11:48:23 [main] Starting child services...
+2026/08/23 11:48:23 [runner] Started service hydra (PID: 320466)
+2026/08/23 11:48:23 [runner] Started service core-api (PID: 320467)
+2026/08/23 11:48:23 [runner] Started service sso (PID: 320468)
+2026/08/23 11:48:23 [runner] Started service cryptpad (PID: 320470)
+2026/08/23 11:48:23 [runner] Started service webmail (PID: 320473)
+2026/08/23 11:48:23 [main] Reverse Proxy listening on http://127.0.0.1:8090
+2026/08/23 11:48:23 [core-api] (ERR) 2026/08/23 11:48:23 PostgreSQL database connection successful
+2026/08/23 11:48:23 🚀 aurion-api server started on http://localhost:8070 (production)
+2026/08/23 11:48:23 [hydra] Thank you for using Ory Hydra v26.2.0!
+2026/08/23 11:48:23 [hydra] (ERR) time=2026-08-23T11:48:23Z level=info msg=No tracer configured - skipping tracing setup audience=application service_name=Ory Hydra service_version=v26.2.0
+2026/08/23 11:48:23 [hydra] (ERR) time=2026-08-23T11:48:23Z level=info msg=Software quality assurance features are enabled. Learn more at: https://www.ory.sh/docs/ecosystem/sqa audience=application service_name=Ory Hydra service_version=v26.2.0
+2026/08/23 11:48:23 [hydra] (ERR) time=2026-08-23T11:48:23Z level=info msg=Setting up http server on 0.0.0.0:4444 audience=application service_name=Ory Hydra service_version=v26.2.0
+time=2026-08-23T11:48:23Z level=warning msg=HTTPS is disabled. Please ensure that your proxy is configured to provide HTTPS, and that it redirects HTTP to HTTPS. audience=application service_name=Ory Hydra service_version=v26.2.0
+2026/08/23 11:48:23 [hydra] (ERR) time=2026-08-23T11:48:23Z level=info msg=Setting up http server on 0.0.0.0:4445 audience=application service_name=Ory Hydra service_version=v26.2.0
+time=2026-08-23T11:48:23Z level=warning msg=HTTPS is disabled. Please ensure that your proxy is configured to provide HTTPS, and that it redirects HTTP to HTTPS. audience=application service_name=Ory Hydra service_version=v26.2.0
+2026/08/23 11:48:23 [webmail] ▲ Next.js 16.2.11
+2026/08/23 11:48:23 [webmail] - Local:         http://localhost:3000
+- Network:       http://0.0.0.0:3000
+✓ Ready in 0ms
+2026/08/23 11:48:23 [sso] Listening on http://0.0.0.0:3030
+2026/08/23 11:48:23 [webmail] Bulwark Webmail v1.8.1
+2026/08/23 11:48:24 [cryptpad] =============================
+2026/08/23 11:48:24 [cryptpad] Create your first admin account and customize your instance by visiting
+https://pad.aurionmail.org/install/#af8fcb1157b35a8dbc7ac956e62ccfa1427d2fcb16428b4aafa9e61cdd115485
+=============================
+2026/08/23 11:48:24 [webmail] [INFO ] 2026-08-23T11:48:24.337Z Admin dashboard disabled (no ADMIN_PASSWORD set)
+Admin dashboard initialized
+2026/08/23 11:48:24 [webmail] 
+==============================================================
+  SETUP REQUIRED
+  Token: b30214eb5c73587183d8086cdf5ba68bd21cbd6c40290bb0e948a00dd1384500
+  Open:  http://<host>:3000/setup?token=b30214eb5c73587183d8086cdf5ba68bd21cbd6c40290bb0e948a00dd1384500
+  Token expires in 1 hour. Restart the container to reissue.
+==============================================================
+
+2026/08/23 11:48:24 [webmail] [INFO ] 2026-08-23T11:48:24.357Z telemetry: scheduler not started {"consent":"off"}
+2026/08/23 11:48:24 [webmail] [INFO ] 2026-08-23T11:48:24.370Z version-check: scheduler started {"nextInMs":30000}
+```
+- You see a link to finsih installing of cryptpad and Bulwark, use it now to do that without https ou wait for nginx conf to be enabled.
 - you will see a link to finish install of Bulwark webmail, use it
-- You can use `orchestra.service` file to launch aurion as a service.
+### Reverse Proxy
+- run
+```
+certbot certonly --webroot \
+   -w /var/www/html \
+   -d sand.DOMAIN_REPLACE_ME \
+   -d pad.DOMAIN_REPLACE_ME \
+   -d web.DOMAIN_REPLACE_ME \
+   -d api.DOMAIN_REPLACE_ME \
+   -d oauth.DOMAIN_REPLACE_ME \
+   -d sso.DOMAIN_REPLACE_ME
+```
+- run `openssl dhparam -out /etc/nginx/dhparam.pem 4096` if needed.
+- add this in http bloc in `/etc/nginx/nginx.conf` :
+```
+map $http_upgrade $connection_upgrade {
+        default upgrade;
+        ''      close;
+    }
+```
+- edit [NGINX conf file](./conf/nginx/aurion_orchestra.conf) and enable it with `sudo ln -s /etc/nginx/sites-available/aurion_orchestra.conf /etc/nginx/sites-enabled/`
+- `sudo nginx -t`
+- `sudo systemctl reload nginx`
+- If you waited to finish installing Bulwark and Cryptpad, relaunch orchestra and finish setup.
 # Configure Auth
-All we need is now installed. We must now configure the SSO.
+All we need is now installed. 
+- You can use `orchestra.service` file to launch aurion as a service.
+
+We must now configure the SSO.
 ## Config Hydra
 cd /path_orchestra/data/runtime/hydra
+<!-- Maybe we could automatize this on orchestrator too ? -->
 ### Bulwark + Stalwart
 ```bash
   ./hydra create oauth2-client \
