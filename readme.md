@@ -100,7 +100,7 @@ Here is how the components fit together. Items highlighted in **bold** are built
 - **Bulwark PGP Plugin:** Extension enabling end-to-end OpenPGP mail encryption.
 - **Core-API:** Central server managing key sync, session state, and inter-app communication.
 - **Bridges:** Lightweight bridge scripts handling secure secret sharing during login/logout routines.
-- **CryptPad (Customized):** Integrated with an SSO plugin and custom styling for a unified UI.
+- **CryptPad (Customized):** Integrated with the SSO plugin and custom styling for a unified UI.
 
 AurionMail is a distributed suite. However, you can use [Orchestra](https://github.com/AurionMail/orchestra) to get a single binary covering
 - Hydra
