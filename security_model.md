@@ -1,7 +1,7 @@
 # AurionMail Security Model
 ## General Concepts
 
-In this document, a **secret** refers to any unencrypted data (such as a raw PGP private key or CryptPad seed) that could allow an administrator or attacker to decrypt user data. An **encrypted secret** requires the user's master password (or a key derived from it) to be decrypted.
+In this document, a **secret** refers to any unencrypted data (such as a raw PGP private key or CryptPad seed) that could allow an administrator or attacker to decrypt user data. An **encrypted secret** requires a temporary key on user's device to be decrypted.
 
 ### Scope
 
