@@ -13,3 +13,7 @@ To activate https for Cryptpad (pad.), don't folllow the precendet instructions.
 - sudo certbot --nginx -d pad.DOMAIN_REPLACE_ME -d sand.DOMAIN_REPLACE_ME
 - sudo openssl dhparam -out /etc/nginx/dhparam.pem 4096 (can take some times... (5min on my test server))
 - Then uncomment part 443
+
+## Core API
+If you want to activate the web key server to make your keys discoverable, you need two domain for the core API. If you don't want, ignore the following instructions :
+- sudo certbot --nginx -d api.DOMAIN_REPLACE_ME -d openpgpkeys.DOMAIN_REPLACE_ME

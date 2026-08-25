@@ -1,6 +1,6 @@
 server {
     listen 80;
-    server_name api.DOMAIN_REPLACE_ME;
+    server_name api.DOMAIN_REPLACE_ME openpgpkeys.DOMAIN_REPLACE_ME;
 
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-Frame-Options "DENY" always;
