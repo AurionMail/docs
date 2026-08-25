@@ -55,6 +55,7 @@ Proton offers a smooth single-password experience, but its backend is closed-sou
 - **Key Synchronization:** Seamless key syncing across authorized user devices.
 - **Core Integrations:** Full feature sets inherited from underlying services ([CryptPad](https://docs.cryptpad.org/),  [Bulwark Webmail](https://github.com/bulwarkmail/webmail/) and the [PGP E2E Plugin for Bulwark](https://github.com/paulhenry46/pgp-plugin)).
 - **Account install** : You can create users in LDAP with your workflow and give them a temporary password. Users then visit sso.domain/init to create their master password and activate their account.
+- **Web Key Server** : Imported/Generated key in the PGP Plugin are automatically discoverable with Web Key Directory.
 
 ### Roadmap / Planned Features
 - **Emergency Account Hold:** A secure URL generated at account creation that disables the account if accessed (protecting data if a master password is compromised).
