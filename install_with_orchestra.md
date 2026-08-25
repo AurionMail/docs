@@ -115,7 +115,7 @@ certbot certonly --webroot \
    -d pad.DOMAIN_REPLACE_ME \
    -d web.DOMAIN_REPLACE_ME \
    -d api.DOMAIN_REPLACE_ME \
-   -d openpgpkeys.DOMAIN_REPLACE_ME \
+   -d openpgpkey.DOMAIN_REPLACE_ME \
    -d oauth.DOMAIN_REPLACE_ME \
    -d sso.DOMAIN_REPLACE_ME
 ```
