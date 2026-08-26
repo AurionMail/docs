@@ -22,6 +22,10 @@ AurionMail acts as the orchestrator linking CryptPad and a JMAP-based email serv
 Users only need to remember **one single password** to encrypt and decrypt both their emails and CryptPad documents. You enter it once per session to access CryptPad, the webmail, or both.
 
 Additionally, we refreshed CryptPad's UI to provide a modern, cohesive look and feel across the suite.
+
+## Video Demo
+Demonstrate the Single login to access Mail encryption and Cryptpad documents + the new Cryptpad UI
+![Demo Video](./screenshots/demo.gif)
 ## Why AurionMail Suite?
 
 Existing privacy solutions usually force a compromise between **user experience**, **self-hosting control**, and **open standards**. 
