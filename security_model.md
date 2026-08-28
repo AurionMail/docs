@@ -58,12 +58,7 @@ To write parameters into child storage (Step 6), communication is handled via em
 - To compromise a secret, an attacker must simultaneously gain access to the **user's local storage/disk** and the **server's volatile RAM** within the 5-minute window.
 - Abandoning the flow midway results in server-side secret deletion, rendering localized parameters useless.
 
-## Authentication & Key Derivation
-### Main Password & Authentication
-When an account is provisioned in LDAP, the user sets their password via the SSO portal. 
-The authentication payload sent over the wire is an **Argon2id** hash derived client-side from the user's password using the salt format `auth_salt_${username}`.
-
-### Key Derivation Strategy
+##  Key Derivation
 Upon account unlock or key import, a single **Argon2id** computation processes the master passphrase along with a 16-byte random salt to yield a **Master HKDF Key**.
 
 Using **HKDF (SHA-256)**, domain-isolated sub-keys are derived instantly without requiring repeated, computationally expensive Argon2id executions:
