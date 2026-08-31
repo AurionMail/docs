@@ -269,8 +269,8 @@ Go to admin ui : https://web.DOMAIN_REPLACE_ME/admin then Authentication :
 To use Bulwark with Aurion, you need the Aurion PGP Plugin. This is the central part of AurionMail as this plugin enble users to encrypt mails and cryptpad documents.
 
 Now, because of restrcitions in plugin system of Bulwark, we can't just provide the zip file of the plugin. But don't worry ! It is very simple.
-- Download https://github.com/AurionMail/bulwark-pgp-plugin/releases/download/1.0.0/index.js 
-- Download https://github.com/AurionMail/bulwark-pgp-plugin/releases/download/1.0.0/manifest.json
+- Download https://github.com/AurionMail/bulwark-pgp-plugin/releases/download/2.0.1/index.js 
+- Download https://github.com/AurionMail/bulwark-pgp-plugin/releases/download/2.0.1/manifest.json
 - The file you need to edit is the manifest. Indeed, Bulwark require all Origin used by a plugin to be in the manifest. So, you need to replace
 ```
 "httpOrigins": [
