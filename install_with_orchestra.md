@@ -106,6 +106,7 @@ Admin dashboard initialized
 ```
 - You see a link to finsih installing of cryptpad and Bulwark, use it now to do that without https ou wait for nginx conf to be enabled.
 - you will see a link to finish install of Bulwark webmail, use it
+- Visit sso.domain/conf to generate an OPRF secret which will be used for OPAQUE auth. Paste it in the .env file. Then relaunch
 ### Reverse Proxy
 - run
 ```

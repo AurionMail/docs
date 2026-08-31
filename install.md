@@ -141,6 +141,7 @@ We use this app to check credential against LDAP and let the user consent to giv
 - add the webserver conf file, add https and enable it
     - [apache](./conf/apache/sso.conf)
     - [nginx](./conf/nginx/sso.domain)
+- after the first launch, visit /conf to get a secret you can use in the .env. Then restart.
 
 ## Cryptpad
 - sudo -u pad bash
