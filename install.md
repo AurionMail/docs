@@ -34,7 +34,7 @@ For testing with up to 30 users, 2GB cheap VPS is enough. In this tutorial, we w
 | **Stalwart** | Mail Server | `127.0.0.1:8080` | `mail.` | `stalwart` | `MANUAL` | /opt/stalwart | ❌ No |
 | **Bridges** | Bridges | *Integrated with reverse proxy* | - | `aurion` | `MANUAL` |/home/aurion/aurionmail/bridges  | 🟢 Yes |
 ## Alternative methods
-### Orchestra (Experimental)
+### Orchestra
 If you want something which works in minutes, without installing node, you can use [Aurion Orchestra](./install_with_orchestra.md). It is a single GO binary with 
 - Cryptpad (without Collabora)
 - Bulwark
@@ -42,7 +42,9 @@ If you want something which works in minutes, without installing node, you can u
 - Aurion API
 - node
 
-You have just one port and one NGINX file to manage. All complicated configuration is done by the binary. It's magic ! This is not recomanded if you have already installed Cryptpad or if you want to entierely keep control on your configuration, but it is the easier way to start with Aurion. It is experimental, so if you have bugs, something weird, open an issue ! 
+You have just one port and one NGINX file to manage. All complicated configuration is done by the binary. It's magic ! This is not recomanded if you have already installed Cryptpad or if you want to entierely keep control on your configuration, but it is the easier way to start with Aurion. It is experimental, so if you have bugs, something weird, open an issue !
+
+To install with orchestra : [Install with Orchestra](./install_with_orchestra.md)
 ### Installation Script
 You can use the [installation script](install.sh) to install all or just parts of the system. If you use it, at the end, you will have to Add the Aurion PGP Plugin to bulwark. This step can't be automatised.
 ## Users
@@ -141,7 +143,9 @@ We use this app to check credential against LDAP and let the user consent to giv
 - add the webserver conf file, add https and enable it
     - [apache](./conf/apache/sso.conf)
     - [nginx](./conf/nginx/sso.domain)
-- after the first launch, visit /conf to get a secret you can use in the .env. Then restart.
+
+> [!WARNING]
+> After the first launch, visit /conf to get a secret you can use in the .env. Then restart. If you don't do that, a default value will be used. it is ok for testing but not advised at all in production !
 
 ## Cryptpad
 - sudo -u pad bash
@@ -297,3 +301,5 @@ Navigate to webUI with your admin account, then : Authentication->Directories
 Navigate to Authentication -> General: Select your created directory as the primary authentication directory
 ### Cryptpad
 Nothing to do, it has been configured with "nano /home/pad/cryptpad/config/sso.js and add the content [sso file](./conf/env/pad/sso.js)" Remember ?
+## And now ?
+You can go to [usage.md](./usage.md).

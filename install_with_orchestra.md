@@ -106,7 +106,9 @@ Admin dashboard initialized
 ```
 - You see a link to finsih installing of cryptpad and Bulwark, use it now to do that without https ou wait for nginx conf to be enabled.
 - you will see a link to finish install of Bulwark webmail, use it
-- Visit sso.domain/conf to generate an OPRF secret which will be used for OPAQUE auth. Paste it in the .env file. Then relaunch
+
+> [!WARNING]
+> After the first launch, visit sso.domain/conf to generate an OPRF secret which will be used for OPAQUE auth. Paste it in the .env file. Then relaunch. If you don't do that, a default value will be used. it is ok for testing but not advised at all in production !
 ### Reverse Proxy
 - run
 ```
@@ -203,3 +205,5 @@ Navigate to webUI with your admin account, then : Authentication->Directories
 - Groups Claim : groups
 - don't forget to add your domain to username domain.
 Navigate to Authentication -> General: Select your created directory as the primary authentication directory
+## And now ?
+You can go to [usage.md](./usage.md).
