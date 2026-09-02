@@ -45,6 +45,8 @@ If you want something which works in minutes, without installing node, you can u
 You have just one port and one NGINX file to manage. All complicated configuration is done by the binary. It's magic ! This is not recomanded if you have already installed Cryptpad or if you want to entierely keep control on your configuration, but it is the easier way to start with Aurion. It is experimental, so if you have bugs, something weird, open an issue !
 
 To install with orchestra : [Install with Orchestra](./install_with_orchestra.md)
+### Docker
+We profilde Docker for Orchestra. See [Install with Orchestra and Docker](./install_with_docker.md)
 ### Installation Script
 You can use the [installation script](install.sh) to install all or just parts of the system. If you use it, at the end, you will have to Add the Aurion PGP Plugin to bulwark. This step can't be automatised.
 ## Users

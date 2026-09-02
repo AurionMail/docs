@@ -1,4 +1,4 @@
-# Aurion Installation Tutorial with Orchestra
+# Aurion Installation Tutorial with Docker
 ## Stalwart Web Server
 Run the [Installation Script](https://stalw.art/docs/install/platform/linux/) provided by Stalwart and follow the standard configuration.
 - add the webserver conf file, add https and enable it
@@ -25,39 +25,11 @@ The default admin user is admin / password . Once connected throught the webUI, 
 - add the webserver conf file, add https and enable it
     - [apache](./conf/apache/ldap.conf)
     - [nginx](./conf/nginx/ldap.domain)
-## Ory Hydra
-- sudo -i -u postgres
-- createdb hydra
-- psql
-- ALTER SYSTEM SET password_encryption = 'scram-sha-256';
-- SELECT pg_reload_conf();
-- CREATE USER hydra PASSWORD 'HYDRA_PASSWORD';
-- exit;
-- nano /etc/postgresql/17/main/pg_hba.conf
-- add `host    all             all             127.0.0.1/32            scram-sha-256`
-- `psql -U hydra -W -h 127.0.0.1`
-- type password to check
 
-- psql -d hydra
-- GRANT ALL ON SCHEMA public TO hydra;
-- GRANT USAGE ON SCHEMA public TO hydra;
-- ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO hydra;
-- ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO hydra;
-- CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-- GRANT EXECUTE ON FUNCTION uuid_generate_v4() TO hydra;
-- \q
-## Aurion API
-- sudo -u postgres psql
-- CREATE USER aurionuser WITH PASSWORD AURION_DB_PASSWORD;
-- CREATE DATABASE auriondb OWNER aurionuser;
-- \c auriondb
-- GRANT ALL ON SCHEMA public TO aurionuser;
-- ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO aurionuser;
-- ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO aurionuser;
-## Aurion Orchestra
-- first, create the user who will run aurion : `- useradd -s /bin/false -m aurion`
-- download latest binary at https://github.com/AurionMail/orchestra/releases and edit .env file.
-- launch orchestra
+## Aurion Orchestra with Docker
+- create a directory on your machine and put inside the [docker-compose.yml](https://github.com/AurionMail/orchestra/blob/main/docker-compose.yml) and [env file](https://github.com/AurionMail/orchestra/blob/main/.env.docker.example). Edit them (at least env file).
+- rename `.env.docker.example` to `.env`
+- `docker compose up`
 - you will see in logs the migrations for hydra and Aurion API happening. At the end, you whould see something like this
 ```
 2026/08/23 11:48:20 ==================================================
@@ -135,11 +107,6 @@ map $http_upgrade $connection_upgrade {
 - `sudo systemctl reload nginx`
 - If you waited to finish installing Bulwark and Cryptpad, relaunch orchestra and finish setup.
 # Configure Auth
-All we need is now installed. 
-- You can use `orchestra.service` file to launch aurion as a service.
-
-We must now configure  clients.
-
 ## Config clients
 ### Bulwark
 #### Aurion PGP Plugin

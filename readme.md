@@ -115,7 +115,7 @@ AurionMail is a distributed suite. However, you can use [Orchestra](https://gith
 - Bridges
 - Cryptpad Customized
 
-See [Installation Guide](./install.md) for more details.
+We also support Docker. See [Installation Guide](./install.md) for more details.
 ## Repositories & Components
 Explore the individual sub-modules of the project:
 - [SSO App](https://github.com/aurionMail/sso)
