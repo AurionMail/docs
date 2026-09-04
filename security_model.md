@@ -12,6 +12,8 @@ Rather than claiming absolute Zero-Trust, which is technically unachievable in p
 ### OpenPGP Limitations & Forward Secrecy
 OpenPGP relies on long-term asymmetric keypairs. If a master password or private key is compromised at any point in the future, all historically archived emails encrypted with that key can be decrypted retroactively. AurionMail syncs the PGP private key (wrapped via AES-GCM) to enable seamless cross-device UX. This prioritizes multi-device usability over strict forward secrecy. Users requiring forward secrecy must manage ephemeral keys locally.
 
+For more general details about mail security, see https://www.privacyguides.org/en/basics/email-security
+
 ### Public Key Authenticity & Metadata
 PGP over SMTP does not encrypt email envelopes (headers, timestamps, sender/recipient addresses). Encrypting to an unverified public key invalidates confidentiality guarantees. AurionMail relies on Web Key Directory (WKD) lookup to authenticate correspondent keys.
 

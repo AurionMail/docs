@@ -64,6 +64,8 @@ Proton offers a smooth single-password experience, but its backend is closed-sou
 ### Roadmap / Planned Features
 - **Emergency Account Hold:** A secure URL generated at account creation that disables the account if accessed (protecting data if a master password is compromised).
 - **Emergency Account Destruction:** A secure URL that permanently destroys the account and its associated keys if visited.
+- **Contacts Encryption**
+- **Calendar Encryption**
 
 ## Screenshots
 
