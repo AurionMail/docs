@@ -35,3 +35,6 @@ It is an advantage of using Orchestra, updating is very simple :
 - `wget https://github.com/AurionMail/orchestra/releases/download/VERSION_NUMBER/aurion-orchestrator-linux-amd64.zip`
 - `unzip aurion-orchestrator-linux-amd64.zip`
 - Done !
+
+## Advices for users
+At first visit of webmail, you need to go to settings-> Aurion PGP to generate or upload your PGP key. Once generated, you need to lock and unlock it before activating Cryptpad
