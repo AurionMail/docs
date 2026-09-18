@@ -25,8 +25,8 @@ Here is some info you may need to configure your client.
  - We request data for these scopes : `openid profile email`
  - We use a `S256` code challenge method
  - Callback URL : `https://sso.domain/login/oidc/callback`
- ### Authelia
- #### Basic
+### Authelia
+#### Basic
 Add to your config file :
 ```yml
 clients:
