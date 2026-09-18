@@ -26,6 +26,7 @@ Here is some info you may need to configure your client.
  - We use a `S256` code challenge method
  - Callback URL : `https://sso.domain/login/oidc/callback`
  ### Authelia
+ #### Basic
 Add to your config file :
 ```yml
 clients:
@@ -48,4 +49,21 @@ clients:
     grant_types:
         - 'authorization_code'
         - 'refresh_token'
+```
+#### RP Logout
+You can add this to your nginx reverse proxy :
+```
+location = /logout {
+        if ($arg_from_aurion != "true") {
+            return 302 https://oauth.domain/oauth2/sessions/logout;
+        }
+        proxy_pass http://127.0.0.1:9091;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $http_host;
+        proxy_set_header X-Forwarded-URI $request_uri;
+    }
 ```
