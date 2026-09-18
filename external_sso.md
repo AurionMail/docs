@@ -25,3 +25,27 @@ Here is some info you may need to configure your client.
  - We request data for these scopes : `openid profile email`
  - We use a `S256` code challenge method
  - Callback URL : `https://sso.domain/login/oidc/callback`
+ ### Authelia
+Add to your config file :
+```yml
+clients:
+    - client_id: 'aurionmail'
+    client_name: 'AurionMail'
+    client_secret: 'your_cool_secret'
+    token_endpoint_auth_method: 'client_secret_post'
+
+    authorization_policy: 'one_factor'
+
+    redirect_uris:
+        - 'https://sso.domain/login/oidc/callback'
+    scopes:
+        - 'openid'
+        - 'profile'
+        - 'email'
+
+    response_types:
+        - 'code'
+    grant_types:
+        - 'authorization_code'
+        - 'refresh_token'
+```
