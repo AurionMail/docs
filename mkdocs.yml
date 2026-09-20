@@ -1,0 +1,76 @@
+site_name: AurionMail Documentation
+site_url: https://aurionmail.github.io/docs/
+site_description: AurionMail docs
+
+repo_url: https://github.com/aurionmail/docs
+repo_name: aurionmail/docs
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  logo: assets/logo_white.png
+  language: en
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Light mode
+  features:
+    - navigation.footer
+    - navigation.instant
+    - navigation.tracking
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+
+plugins:
+  - search
+  - callouts
+  
+nav:
+  - Welcome: index.md
+  - Getting Started:
+      - Overview: getting-started/index.md
+      - LDAP: getting-started/ldap/index.md
+      - Stalwart: getting-started/stalwart/index.md
+      - Installation:
+          - Binary: getting-started/installation/binary.md
+          - Docker: getting-started/installation/docker.md
+          - Advanced: getting-started/installation/advanced.md
+  - Usage:
+      - Overview: usage/index.md
+      - External SSO: usage/external_sso.md
+  - Development:
+      - Overview: development/index.md
+      - Architecture:
+          - Security Model: development/architecture/security_model.md
+      - Protocols:
+          - Overview: development/protocols/index.md
+          - Login: development/protocols/login.md
+          - Logout: development/protocols/logout.md
+          - Logout All: development/protocols/logout_all.md
+          - Change Password: development/protocols/change_password.md
+          - Access to Cryptpad: development/protocols/access_to_cryptpad.md
+          - External SSO:
+              - Overview: development/protocols/external_sso/index.md
+              - Login: development/protocols/external_sso/login.md
+              - Logout: development/protocols/external_sso/logout.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight
+  - tables                

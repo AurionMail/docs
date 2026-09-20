@@ -1,3 +1,13 @@
+---
+title: "Basic quickstart"
+description: "How to use AurionMail."
+weight: 60
+draft: false
+tags:
+  - deployment
+  - usage
+---
+
 # Usage
 ## Generating users
 For better compatibilities with your existing systems, Aurion doesn't come with a built-in system to generate or create users. We relie on LDAP. As a result, you must create with your habitual workflow. If you installed LLDAP, it can be done throught the webUI. To initilaize an user account, you must populated name, mail and password field.
