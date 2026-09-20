@@ -60,13 +60,14 @@ Proton offers a smooth single-password experience, but its backend is closed-sou
 - **Core Integrations:** Full feature sets inherited from underlying services ([CryptPad](https://docs.cryptpad.org/),  [Bulwark Webmail](https://github.com/bulwarkmail/webmail/) and the [PGP E2E Plugin for Bulwark](https://github.com/paulhenry46/pgp-plugin)).
 - **Account install** : You can create users in LDAP with your workflow and give them a temporary password. Users then visit sso.domain/init to create their master password and activate their account.
 - **Web Key Server** : Imported/Generated key in the PGP Plugin are automatically discoverable with Web Key Directory.
+- **Basic Integration with external SSO with OIDC** : Let users authenticate with an external IdP supporting OIDC. Users still need a second password to encryot their data in AurionMail.
 
 ### Roadmap / Planned Features
 - **Emergency Account Hold:** A secure URL generated at account creation that disables the account if accessed (protecting data if a master password is compromised).
 - **Emergency Account Destruction:** A secure URL that permanently destroys the account and its associated keys if visited.
 - **Contacts Encryption**
 - **Calendar Encryption** (WIP)
-- **Integration with external SSO with OIDC** (WIP)
+- **Advanced Integration with external SSO** : Promote users as admin depending of their group.
 
 ## Screenshots
 
