@@ -25,7 +25,7 @@ Additionally, we refreshed CryptPad's UI to provide a modern, cohesive look and 
 
 ## Video Demo
 Demonstrate the Single login to access Mail encryption and Cryptpad documents + the new Cryptpad UI
-![Demo Video](./screenshots/demo.gif)
+![Demo Video](./docs/assets/images/demo.gif)
 ## Why AurionMail Suite?
 
 Existing privacy solutions usually force a compromise between **user experience**, **self-hosting control**, and **open standards**. 
@@ -73,24 +73,24 @@ Proton offers a smooth single-password experience, but its backend is closed-sou
 
 <table>
 <tr>
-<td width="50%"><img src="screenshots/login.png" alt="Login" /></td>
-<td width="50%"><img src="screenshots/logout.png" alt="Logout" /></td>
+<td width="50%"><img src="./docs/assets/images/login.png" alt="Login" /></td>
+<td width="50%"><img src="./docs/assets/images/logout.png" alt="Logout" /></td>
 </tr>
 <tr>
 <td><sub><b>Login</b> – Login page.</sub></td>
 <td><sub><b>Logout</b> – Logout page.</sub></td>
 </tr>
 <tr>
-<td><img src="screenshots/keys.png" alt="Keys" /></td>
-<td><img src="screenshots/mails.png" alt="Mails" /></td>
+<td><img src="./docs/assets/images/keys.png" alt="Keys" /></td>
+<td><img src="./docs/assets/images/mails.png" alt="Mails" /></td>
 </tr>
 <tr>
 <td><sub><b>Bulwark's Aurion Plugin</b> – Manage keys, change password, with the Aurion Plugin.</sub></td>
 <td><sub><b>Email Encryption</b> – Send encryptped emails to your contacts.</sub></td>
 </tr>
 <tr>
-<td><img src="screenshots/cryptpad.png" alt="Light mode" /></td>
-<td><img src="screenshots/settings.png" alt="Settings" /></td>
+<td><img src="./docs/assets/images/cryptpad.png" alt="Light mode" /></td>
+<td><img src="./docs/assets/images/settings.png" alt="Settings" /></td>
 </tr>
 <tr>
 <td><sub><b>Cryptpad Drive</b> – Cryptpad is integrated with a refreshed and modern UI</sub></td>
@@ -119,7 +119,7 @@ AurionMail is a distributed suite. However, you can use [Orchestra](https://gith
 - Bridges
 - Cryptpad Customized
 
-We also support Docker. See [Installation Guide](./install.md) for more details.
+We also support Docker. See [Installation Guide](./docs/getting-started/index.md) for more details.
 ## Repositories & Components
 Explore the individual sub-modules of the project:
 - [SSO App](https://github.com/aurionMail/sso)
@@ -130,4 +130,4 @@ Explore the individual sub-modules of the project:
 - [Orchestra](https://github.com/AurionMail/orchestra)
 
 ## Getting Started
-Are you a system administrator looking to test AurionMail? Check out the [Installation Guide](./install.md).
+Are you a system administrator looking to test AurionMail? Check out the [Installation Guide](./docs/getting-started/index.md).
