@@ -1,6 +1,6 @@
 ---
 title: "Installation with Binary Orchestra"
-description: "How to install AurionMail with the binary."
+description: "Deployment procedure for installing AurionMail using the Orchestra binary."
 weight: 40
 draft: false
 tags:
@@ -9,42 +9,81 @@ tags:
   - SSO
 ---
 
-# Installation with Binary
-## Ory Hydra
-- sudo -i -u postgres
-- createdb hydra
-- psql
-- ALTER SYSTEM SET password_encryption = 'scram-sha-256';
-- SELECT pg_reload_conf();
-- CREATE USER hydra PASSWORD 'HYDRA_PASSWORD';
-- exit;
-- nano /etc/postgresql/17/main/pg_hba.conf
-- add `host    all             all             127.0.0.1/32            scram-sha-256`
-- `psql -U hydra -W -h 127.0.0.1`
-- type password to check
+# Installation with Binary Orchestra
 
-- psql -d hydra
-- GRANT ALL ON SCHEMA public TO hydra;
-- GRANT USAGE ON SCHEMA public TO hydra;
-- ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO hydra;
-- ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO hydra;
-- CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-- GRANT EXECUTE ON FUNCTION uuid_generate_v4() TO hydra;
-- \q
-## Aurion API
-- sudo -u postgres psql
-- CREATE USER aurionuser WITH PASSWORD AURION_DB_PASSWORD;
-- CREATE DATABASE auriondb OWNER aurionuser;
-- \c auriondb
-- GRANT ALL ON SCHEMA public TO aurionuser;
-- ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO aurionuser;
-- ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO aurionuser;
-## Aurion Orchestra
-- first, create the user who will run aurion : `- useradd -s /bin/false -m aurion`
-- download latest binary at https://github.com/AurionMail/orchestra/releases and edit .env file.
-- launch orchestra : `./aurion-orchestrator`
-- you will see in logs the migrations for hydra and Aurion API happening. At the end, you whould see something like this
+This guide details the process for configuring dependencies (PostgreSQL), deploying the Aurion Orchestra binary, setting up the Nginx reverse proxy, and integrating the Bulwark PGP plugin. We assume Stalwart and LDAP/external IdP are ready.
+
+## Database Setup (PostgreSQL)
+### Ory Hydra Configuration
+Switch to the PostgreSQL system user and create the database:
+
+```bash
+sudo -i -u postgres
+createdb hydra
+psql
 ```
+Set the password encryption method and create the `hydra` database role:
+```sql
+ALTER SYSTEM SET password_encryption = 'scram-sha-256';
+SELECT pg_reload_conf();
+CREATE USER hydra WITH PASSWORD 'HYDRA_PASSWORD';
+\q
+
+```
+Update your PostgreSQL authentication policy (e.g., in `/etc/postgresql/17/main/pg_hba.conf`) by adding the following rule:
+```text
+host    all             all             127.0.0.1/32            scram-sha-256
+```
+> [!INFO]
+> You should replace `17` by your actual postgres version.
+
+Verify access using the newly created credentials:
+```bash
+psql -U hydra -W -h 127.0.0.1
+
+```
+After entering your password, grant the required privileges and enable the UUID extension:
+```sql
+\c hydra
+GRANT ALL ON SCHEMA public TO hydra;
+GRANT USAGE ON SCHEMA public TO hydra;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO hydra;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO hydra;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+GRANT EXECUTE ON FUNCTION uuid_generate_v4() TO hydra;
+\q
+```
+### Aurion API Configuration
+Open the PostgreSQL administrative console:
+
+```bash
+sudo -u postgres psql
+```
+Create the dedicated user and database, then assign permissions:
+```sql
+CREATE USER aurionuser WITH PASSWORD 'AURION_DB_PASSWORD';
+CREATE DATABASE auriondb OWNER aurionuser;
+\c auriondb
+GRANT ALL ON SCHEMA public TO aurionuser;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO aurionuser;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO aurionuser;
+\q
+```
+## Deploying Aurion Orchestra
+1. Create the non-privileged system user:
+```bash
+sudo useradd -s /bin/false -m aurion
+```
+2. Download and configure the binary:
+* Fetch the latest release from the [AurionMail Orchestra repository](https://github.com/AurionMail/orchestra/releases).
+* Update the `.env` file according to your environment settings.
+
+3. Initial Run:
+```bash
+./aurion-orchestrator
+```
+Database migrations for Hydra and Aurion API will execute automatically. You should observe output similar to the following:
+```text
 2026/08/23 11:48:20 ==================================================
 2026/08/23 11:48:20      Starting Aurion Orchestrator Binary          
 2026/08/23 11:48:20 ==================================================
@@ -57,46 +96,31 @@ tags:
 2026/08/23 11:48:23 [runner] Started service cryptpad (PID: 320470)
 2026/08/23 11:48:23 [runner] Started service webmail (PID: 320473)
 2026/08/23 11:48:23 [main] Reverse Proxy listening on http://127.0.0.1:8090
-2026/08/23 11:48:23 [core-api] (ERR) 2026/08/23 11:48:23 PostgreSQL database connection successful
-2026/08/23 11:48:23 🚀 aurion-api server started on http://localhost:8070 (production)
-2026/08/23 11:48:23 [hydra] Thank you for using Ory Hydra v26.2.0!
-2026/08/23 11:48:23 [hydra] (ERR) time=2026-08-23T11:48:23Z level=info msg=No tracer configured - skipping tracing setup audience=application service_name=Ory Hydra service_version=v26.2.0
-2026/08/23 11:48:23 [hydra] (ERR) time=2026-08-23T11:48:23Z level=info msg=Software quality assurance features are enabled. Learn more at: https://www.ory.sh/docs/ecosystem/sqa audience=application service_name=Ory Hydra service_version=v26.2.0
-2026/08/23 11:48:23 [hydra] (ERR) time=2026-08-23T11:48:23Z level=info msg=Setting up http server on 0.0.0.0:4444 audience=application service_name=Ory Hydra service_version=v26.2.0
-time=2026-08-23T11:48:23Z level=warning msg=HTTPS is disabled. Please ensure that your proxy is configured to provide HTTPS, and that it redirects HTTP to HTTPS. audience=application service_name=Ory Hydra service_version=v26.2.0
-2026/08/23 11:48:23 [hydra] (ERR) time=2026-08-23T11:48:23Z level=info msg=Setting up http server on 0.0.0.0:4445 audience=application service_name=Ory Hydra service_version=v26.2.0
-time=2026-08-23T11:48:23Z level=warning msg=HTTPS is disabled. Please ensure that your proxy is configured to provide HTTPS, and that it redirects HTTP to HTTPS. audience=application service_name=Ory Hydra service_version=v26.2.0
-2026/08/23 11:48:23 [webmail] ▲ Next.js 16.2.11
-2026/08/23 11:48:23 [webmail] - Local:         http://localhost:3000
-- Network:       http://0.0.0.0:3000
-✓ Ready in 0ms
-2026/08/23 11:48:23 [sso] Listening on http://0.0.0.0:3030
+...
 2026/08/23 11:48:23 [webmail] Bulwark Webmail v1.8.1
-2026/08/23 11:48:24 [cryptpad] =============================
-2026/08/23 11:48:24 [cryptpad] Create your first admin account and customize your instance by visiting
-https://pad.aurionmail.org/install/#af8fcb1157b35a8dbc7ac956e62ccfa1427d2fcb16428b4aafa9e61cdd115485
+2026/08/23 11:48:24 [cryptpad] 
 =============================
-2026/08/23 11:48:24 [webmail] [INFO ] 2026-08-23T11:48:24.337Z Admin dashboard disabled (no ADMIN_PASSWORD set)
-Admin dashboard initialized
-2026/08/23 11:48:24 [webmail] 
+Create your first admin account and customize your instance by visiting
+https://pad.DOMAIN.org/install/#af8fcb1157b35a8dbc7ac956e62ccfa1427d2fcb16428b4aafa9e61cdd115485
+==============================================================
+...
 ==============================================================
   SETUP REQUIRED
   Token: b30214eb5c73587183d8086cdf5ba68bd21cbd6c40290bb0e948a00dd1384500
   Open:  http://<host>:3000/setup?token=b30214eb5c73587183d8086cdf5ba68bd21cbd6c40290bb0e948a00dd1384500
-  Token expires in 1 hour. Restart the container to reissue.
+  Token expires in 1 hour.
 ==============================================================
 
-2026/08/23 11:48:24 [webmail] [INFO ] 2026-08-23T11:48:24.357Z telemetry: scheduler not started {"consent":"off"}
-2026/08/23 11:48:24 [webmail] [INFO ] 2026-08-23T11:48:24.370Z version-check: scheduler started {"nextInMs":30000}
 ```
-- You see a link to finsih installing of cryptpad and Bulwark, use it now to do that without https ou wait for nginx conf to be enabled.
-- you will see a link to finish install of Bulwark webmail, use it
 
 > [!WARNING]
-> After the first launch, visit sso.domain/conf to generate an OPRF secret which will be used for OPAQUE auth. Paste it in the .env file. Then relaunch. If you don't do that, a default value will be used. it is ok for testing but not advised at all in production !
-### Reverse Proxy
-- run
-```
+> After the first start, navigate to `https://sso.DOMAIN_REPLACE_ME/conf` to generate an OPRF secret required for OPAQUE authentication.
+> Paste this value into your `.env` file and restart the binary. Do not retain default secrets in production environments.
+
+## Reverse Proxy Setup (Nginx)
+
+1. Generate TLS Certificates using Certbot:
+```bash
 certbot certonly --webroot \
    -w /var/www/html \
    -d sand.DOMAIN_REPLACE_ME \
@@ -107,44 +131,50 @@ certbot certonly --webroot \
    -d oauth.DOMAIN_REPLACE_ME \
    -d sso.DOMAIN_REPLACE_ME
 ```
-- run `openssl dhparam -out /etc/nginx/dhparam.pem 4096` if needed.
-- add this in http bloc in `/etc/nginx/nginx.conf` :
+2. Generate Diffie-Hellman Parameters (mandatory for cryptpad):
+```bash
+openssl dhparam -out /etc/nginx/dhparam.pem 4096
 ```
+3. Configure Nginx HTTP Block for WebSockets:
+Add the following map block inside the `http` section of `/etc/nginx/nginx.conf`:
+```nginx
 map $http_upgrade $connection_upgrade {
-        default upgrade;
-        ''      close;
-    }
+    default upgrade;
+    ''      close;
+}
 ```
-- edit [NGINX conf file](../../examples/nginx/aurion_orchestra.conf) and enable it with `sudo ln -s /etc/nginx/sites-available/aurion_orchestra.conf /etc/nginx/sites-enabled/`
-- `sudo nginx -t`
-- `sudo systemctl reload nginx`
-- If you waited to finish installing Bulwark and Cryptpad, relaunch orchestra and finish setup.
-# Configure Auth
-All we need is now installed. 
-- You can use `orchestra.service` file to launch aurion as a service.
-
-We must now configure  clients.
-
-## Config clients
-### Bulwark
-#### Aurion PGP Plugin
-To use Bulwark with Aurion, you need the Aurion PGP Plugin. This is the central part of AurionMail as this plugin enble users to encrypt mails and cryptpad documents.
-
-Now, because of restrcitions in plugin system of Bulwark, we can't just provide the zip file of the plugin. But don't worry ! It is very simple.
-- Download https://github.com/AurionMail/bulwark-pgp-plugin/releases/download/2.0.1/index.js 
-- Download https://github.com/AurionMail/bulwark-pgp-plugin/releases/download/2.0.1/manifest.json
-- The file you need to edit is the manifest. Indeed, Bulwark require all Origin used by a plugin to be in the manifest. So, you need to replace
+4. Enable Site Configuration:
+Copy the example configuration file from [NGINX conf file](../../examples/nginx/aurion_orchestra.conf) into `/etc/nginx/sites-available/`, replace all instances of `DOMAIN_REPLACE_ME` with your actual domain, and activate it:
+```bash
+sudo ln -s /etc/nginx/sites-available/aurion_orchestra.conf /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
 ```
+5. Complete Application Initialization:
+Use the onboarding links printed in the log output to finalize setup for Cryptpad and Bulwark Webmail.
+## Client & Authentication Setup
+You can manage Orchestra as a system service using a standard systemd service unit (`orchestra.service`).
+### Bulwark Setup (Aurion PGP Plugin)
+AurionMail uses a dedicated PGP plugin for Bulwark Webmail to manage end-to-end encryption for emails and Cryptpad documents.
+
+1. Download release 2.0.2 assets:
+* [index.js](https://github.com/AurionMail/bulwark-pgp-plugin/releases/download/2.0.2/index.js?utm_source=gemini)
+* [manifest.json](https://github.com/AurionMail/bulwark-pgp-plugin/releases/download/2.0.2/manifest.json?utm_source=gemini)
+
+2. Edit `manifest.json` and replace placeholder domains with your production endpoints:
+```json
 "httpOrigins": [
-    "https://keys.openpgp.org",
-    "https://api.DOMAIN_REPLACE_ME"
-  ],
-    "frameOrigins": [
-    "https://pad.DOMAIN_REPLACE_ME"
-  ],
+  "https://keys.openpgp.org",
+  "https://api.DOMAIN_REPLACE_ME"
+],
+"frameOrigins": [
+  "https://pad.DOMAIN_REPLACE_ME"
+]
+
 ```
-by your real domain
-- Zip `index.js` and `manifest.json` into a zip file and upload it in administration part of Bulwark
-- Enforce this plugin and go to the plugin Settings to write the API URL, OAuth URL and Pad URL.
-## And now ?
-You can go to [usage.md](../../usage/index.md).
+3. Compress both `index.js` and `manifest.json` into a single `.zip` archive.
+4. Upload the archive via the Bulwark administration panel.
+5. Enable and enforce the plugin and update its settings with your API, OAuth, and Pad URLs.
+
+## Next Steps
+Your setup is complete. Go to [usage.md](../../usage/index.md).
