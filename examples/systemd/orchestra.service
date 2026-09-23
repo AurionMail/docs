@@ -1,0 +1,21 @@
+[Unit]
+Description=Aurion Orchestra
+After=network.target
+
+[Service]
+Type=simple
+User=aurion
+Group=aurion
+WorkingDirectory=/home/aurion/aurionmail
+ExecStart=/home/aurion/aurionmail/orchestra
+
+Restart=always
+RestartSec=3s
+
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
