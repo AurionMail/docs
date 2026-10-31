@@ -38,7 +38,7 @@ Navigate to webUI with your admin account, then : Authentication->Directories
 
 - Groups Claim : groups
 
-- Tokens without scope : interoparibility only
+- Tokens without scope : all
 
 - Allow ID Token claim : true
 
