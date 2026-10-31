@@ -52,7 +52,9 @@ jobs:
 
       - name: Add SSO Plugin
         run: |
-          cd cryptpad/lib/plugins
+          cd cryptpad/lib
+          mkdir plugins
+          cd plugins
           git clone https://github.com/cryptpad/sso
 
       - name: Download, extract and overwrite customized files
@@ -68,9 +70,9 @@ jobs:
             cp -r "$EXTRACTED_CUSTOM/customize" cryptpad/
           fi
           
-          # 2. Overwrite lib directory files in cryptpad
-          if [ -d "$EXTRACTED_CUSTOM/lib" ]; then
-            cp -r "$EXTRACTED_CUSTOM/lib/." cryptpad/lib/
+          # 2. Overwrite node directory files in cryptpad
+          if [ -d "$EXTRACTED_CUSTOM/node_modules" ]; then
+            cp -r "$EXTRACTED_CUSTOM/node_modules/." cryptpad/node_modules/
           fi
           
           # 3. Overwrite www directory files in cryptpad
