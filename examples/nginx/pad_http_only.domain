@@ -1,0 +1,9 @@
+server {
+    listen 80;
+    listen [::]:80;
+    server_name pad.DOMAIN_REPLACE_ME sand.DOMAIN_REPLACE_ME;
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
