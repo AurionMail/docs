@@ -56,6 +56,7 @@ jobs:
           mkdir plugins
           cd plugins
           git clone https://github.com/cryptpad/sso
+          npm ci
 
       - name: Download, extract and overwrite customized files
         run: |
