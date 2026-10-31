@@ -9,6 +9,13 @@ tags:
 
 # Aurion Installation Tutorial
 This tutorial covers installation with Stalwart, Bulwark, Ory Hydra, LLDAP, CryptPad and all you need.
+## Versions
+### Aurion 1.0.0 / Orchestra 1.0.14
+- Stalwart 1.0.1
+- Cryptpad 26.10
+### Aurion 0.6 / Orchestra 1.0.13
+- Stalwart 0.16.x
+- Cryptpad 25.09
 ## Prerequisites
 ### Domain Name
 You need a domain name. This is mandatory. For development, you can create a .local domain if you want. It is referenced as `DOMAIN_REPLACE_ME` in the documentation. You will need to replace in commands and conf files.
