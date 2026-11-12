@@ -54,10 +54,9 @@ jobs:
       - name: Install Dependencies & OnlyOffice (Office version)
         run: |
           cd cryptpad-office
-          ls -all
           npm ci
           npm run install:components
-          ./install-onlyoffice.sh
+          ./install-office.sh
 
       - name: Add SSO Plugin (Both)
         run: |
