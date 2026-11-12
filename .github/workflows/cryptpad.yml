@@ -56,7 +56,7 @@ jobs:
           cd cryptpad-office
           npm ci
           npm run install:components
-          ./install-office.sh
+          ./install-office.sh --accept-license --trust-repository
 
       - name: Add SSO Plugin (Both)
         run: |
