@@ -39,27 +39,38 @@ jobs:
           curl -L "https://github.com/cryptpad/cryptpad/archive/refs/tags/${CRYPTPAD_TAG}.zip" -o cryptpad.zip
           unzip -q cryptpad.zip
           
-          # Rename extracted directory to standard 'cryptpad' name
           EXTRACTED_DIR=$(find . -maxdepth 1 -type d -name "cryptpad-*" | head -n 1)
           mv "$EXTRACTED_DIR" cryptpad
           rm cryptpad.zip
+          
+          cp -r cryptpad cryptpad-office
 
-      - name: Install Dependencies
+      - name: Install Dependencies (Standard)
         run: |
           cd cryptpad
           npm ci
           npm run install:components
 
-      - name: Add SSO Plugin
+      - name: Install Dependencies & OnlyOffice (Office version)
         run: |
-          cd cryptpad/lib
-          mkdir plugins
-          cd plugins
-          git clone https://github.com/cryptpad/sso
-          cd sso
+          cd cryptpad-office
           npm ci
+          npm run install:components
+          ./install-office.sh --accept-license --trust-repository
 
-      - name: Download, extract and overwrite customized files
+      - name: Add SSO Plugin (Both)
+        run: |
+          for dir in cryptpad cryptpad-office; do
+            cd "$dir/lib"
+            mkdir -p plugins
+            cd plugins
+            git clone https://github.com/cryptpad/sso
+            cd sso
+            npm ci
+            cd ../../../..
+          done
+
+      - name: Download, extract and overwrite customized files (Both)
         run: |
           CUSTOM_TAG="${{ steps.tags.outputs.custom_tag }}"
           curl -L "https://github.com/AurionMail/cryptpad_customized/archive/refs/tags/${CUSTOM_TAG}.zip" -o customized.zip
@@ -67,30 +78,33 @@ jobs:
           
           EXTRACTED_CUSTOM=$(find . -maxdepth 1 -type d -name "cryptpad_customized-*" | head -n 1)
           
-          # 1. Move customize directory to cryptpad root
-          if [ -d "$EXTRACTED_CUSTOM/customize" ]; then
-            cp -r "$EXTRACTED_CUSTOM/customize" cryptpad/
-          fi
-          
-          # 2. Overwrite node directory files in cryptpad
-          if [ -d "$EXTRACTED_CUSTOM/node_modules" ]; then
-            cp -r "$EXTRACTED_CUSTOM/node_modules/." cryptpad/node_modules/
-          fi
-          
-          # 3. Overwrite www directory files in cryptpad
-          if [ -d "$EXTRACTED_CUSTOM/www" ]; then
-            cp -r "$EXTRACTED_CUSTOM/www/." cryptpad/www/
-          fi
+          for dir in cryptpad cryptpad-office; do
+            # 1. Move customize directory to cryptpad root
+            if [ -d "$EXTRACTED_CUSTOM/customize" ]; then
+              cp -r "$EXTRACTED_CUSTOM/customize" "$dir/"
+            fi
+            
+            # 2. Overwrite node directory files in cryptpad
+            if [ -d "$EXTRACTED_CUSTOM/node_modules" ]; then
+              cp -r "$EXTRACTED_CUSTOM/node_modules/." "$dir/node_modules/"
+            fi
+            
+            # 3. Overwrite www directory files in cryptpad
+            if [ -d "$EXTRACTED_CUSTOM/www" ]; then
+              cp -r "$EXTRACTED_CUSTOM/www/." "$dir/www/"
+            fi
+          done
           
           # Clean up downloaded customized archive and folder
           rm -rf "$EXTRACTED_CUSTOM" customized.zip
 
-      - name: Archive CryptPad
+      - name: Archive CryptPad Packages
         run: |
           zip -r cryptpad.zip cryptpad/
+          zip -r cryptpad-office.zip cryptpad-office/
 
-      - name: Upload zip to Release
+      - name: Upload zips to Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload ${{ github.event.release.tag_name }} cryptpad.zip --clobber
+          gh release upload ${{ github.event.release.tag_name }} cryptpad.zip cryptpad-office.zip --clobber
