@@ -46,7 +46,7 @@ AurionMail Suite bridges this gap by delivering the smooth Zero-Knowledge experi
 | Feature | Proton Suite | Nextcloud + Mail | Standard CryptPad | **AurionMail Suite** |
 | --- | --- | --- | --- | --- |
 | **100% Open Source & Self-Hosted** | ❌ *(Proprietary backend)* | 🟢 Yes | 🟢 Yes | 🟢 **Yes** |
-| **E2EE Email & Documents** | 🟢 Yes | 🟡 *(Complex / Plugin-based)* | ❌ *(No built-in email)* | 🟢 **Yes** |
+| **E2EE Email, Documents, Calendar** | 🟢 Yes | 🟡 *(Complex / Plugin-based)* | ❌ *(No built-in email)* | 🟢 **Yes** |
 | **Unified Identity & Encryption (1 Password)** | 🟢 Yes | ❌ *(Fragmented SSO / Manual PGP)* | ❌ *(Docs-only account scope)* | 🟢 **Yes** |
 | **Open Standards (OpenPGP, JMAP)** | 🟡 *(OpenPGP supported, limited key discovery)* | 🟢 Yes | ❌ *(N/A for email)* | 🟢 **Yes** |
 
