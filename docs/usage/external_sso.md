@@ -16,8 +16,8 @@ The password field is only used for initialize the user account on SSO. It will 
 
 To initialize their acount on the SSO, users simply go to sso.domain/init and fill their info.
 
-> [!NOTE]
-> If your system is automatised, you can simply give your users a link of this type to automatically fill their username and temporary password : `https://sso.domain/init?username=john.doe&tempPassword=TempSecret123`
+!!! info
+    If your system is automatised, you can simply give your users a link of this type to automatically fill their username and temporary password : `https://sso.domain/init?username=john.doe&tempPassword=TempSecret123`
 ## Ory Hydra
 You can use the SSO + Hydra part to authenticate users to services others than Cryptpad and Bulwark. Go to the Ory Hydra documentation to add your new client in Hydra DB. For reference, here is a conf using stateless JWT you can inspire :
 ```bash
@@ -52,8 +52,8 @@ At first visit of webmail, you need to go to settings-> Aurion PGP to generate o
 
 
 # Auth with external provider
-> [!CAUTION]
-> Authenticating (login + logout) with external provider is currently experimental. If you managed to make this working with a provider not listed here, please make a PR !
+!!! failure
+    Authenticating (login + logout) with external provider is currently experimental. If you managed to make this working with a provider not listed here, please make a PR !
 ## Concept
 This feature enable authentication with an external IdP supporting OIDC. A master password is required to encrypt Aurion data.
 ## Basic configuration
@@ -67,8 +67,8 @@ Simply fill this values in the `.env`
 ```
 `EXTERNAL_OIDC_LOGOUT_URI` is the URL used to logout from the external IdP when this logout is initialized from Aurion. This is the URL Aurionmail should give to navigator to logout the user from your external provider.
 ## Logout from other clients
-> [!TIP]
-> This is helpful only if you have configured a feature like "Single Logout for RP-initiated Logout" on your IdP. If not, the next lines are not relevant. users will need to go to Aurion app to properly logout.
+!!! tip
+    This is helpful only if you have configured a feature like "Single Logout for RP-initiated Logout" on your IdP. If not, the next lines are not relevant. users will need to go to Aurion app to properly logout.
 
 
 `EXTERNAL_OIDC_FULL_LOGOUT_URI` is an optional parameter. It will be used if your IdP uses a full logout system, i.e. the user logout from a client, all other clients of the session must logout. In the case of AurionMail, we need to execute js in the navigator to ensure sensitive data is erased and also because Cryptpad doesn't support logout from SSO. So, to ensure this, when an app ask from logout, you must redirect with your reverse proxy to `oauth.domain/oauth2/sessions/logout`. AurionMail will logout and will redirect to `EXTERNAL_OIDC_FULL_LOGOUT_URI` with paramter `from_aurion=true`.

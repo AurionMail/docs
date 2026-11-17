@@ -34,8 +34,8 @@ Update your PostgreSQL authentication policy (e.g., in `/etc/postgresql/17/main/
 ```text
 host    all             all             127.0.0.1/32            scram-sha-256
 ```
-> [!INFO]
-> You should replace `17` by your actual postgres version.
+!!! info 
+    You should replace `17` by your actual postgres version.
 
 Verify access using the newly created credentials:
 ```bash
@@ -113,9 +113,8 @@ https://pad.DOMAIN.org/install/#af8fcb1157b35a8dbc7ac956e62ccfa1427d2fcb16428b4a
 
 ```
 
-> [!WARNING]
-> After the first start, navigate to `https://sso.DOMAIN_REPLACE_ME/conf` to generate an OPRF secret required for OPAQUE authentication.
-> Paste this value into your `.env` file and restart the binary. Do not retain default secrets in production environments.
+!!! warning "Mandatory Secret"
+    After the first start, navigate to `https://sso.DOMAIN_REPLACE_ME/conf` to generate an OPRF secret required for OPAQUE authentication. Paste this value into your `.env` file and restart the binary. Do not retain default secrets in production environments.
 
 ## Reverse Proxy Setup (Nginx)
 

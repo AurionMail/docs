@@ -16,8 +16,8 @@ The password field is only used for initialize the user account on SSO. It will 
 
 To initialize their acount on the SSO, users simply go to sso.domain/init and fill their info.
 
-> [!NOTE]
-> If your system is automatised, you can simply give your users a link of this type to automatically fill their username and temporary password : `https://sso.domain/init?username=john.doe&tempPassword=TempSecret123`
+!!! note
+    If your system is automatised, you can simply give your users a link of this type to automatically fill their username and temporary password : `https://sso.domain/init?username=john.doe&tempPassword=TempSecret123`
 ## Ory Hydra
 You can use the SSO + Hydra part to authenticate users to services others than Cryptpad and Bulwark. Go to the Ory Hydra documentation to add your new client in Hydra DB. For reference, here is a conf using stateless JWT you can inspire :
 ```bash
