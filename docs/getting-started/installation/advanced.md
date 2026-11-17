@@ -92,6 +92,7 @@ We use this app to check credential against LDAP and let the user consent to giv
     - [nginx](../../examples/nginx/sso.domain)
 
 > [!WARNING]
+>
 > After the first launch, visit /conf to get a secret you can use in the .env. Then restart. If you don't do that, a default value will be used. it is ok for testing but not advised at all in production !
 
 ## Cryptpad
