@@ -73,3 +73,4 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.highlight
   - tables                
+
